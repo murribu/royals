@@ -79,7 +79,6 @@ class InitialTables extends Migration
             $table->string('pitch_name');
             $table->string('game_id');
             $table->string('event_type');
-            $table->unique(['game_id', 'sequence_number']);
             $table->timestamps();
         });
         Schema::create('stats_pitches', function (Blueprint $table) {
@@ -130,8 +129,6 @@ class InitialTables extends Migration
             $table->foreign('stats_event_code_id')->references('id')->on('stats_event_codes');
             $table->integer('stats_sequence')->nullable();
             $table->integer('pfx_sequence_number')->nullable();
-            $table->integer('data_source_id')->unsigned();
-            $table->foreign('data_source_id')->references('id')->on('data_sources');
             $table->timestamps();
         });
         Schema::create('discrepancies', function(Blueprint $table) {
@@ -146,6 +143,15 @@ class InitialTables extends Migration
             $table->datetime('resolved')->nullable()->index();
             $table->timestamps();
         });
+        Schema::create('pitch_data_sources', function(Blueprint $table) {
+            $table->increments('id');
+            $table->integer('pitch_id')->unsigned();
+            $table->foreign('pitch_id')->references('id')->on('pitches');
+            $table->integer('data_source_id')->unsigned();
+            $table->foreign('data_source_id')->references('id')->on('data_sources');
+            $table->integer('data_source_table_id')->index();
+            $table->timestamps();
+        });
     }
 
     /**
@@ -155,6 +161,7 @@ class InitialTables extends Migration
      */
     public function down()
     {
+        Schema::dropIfExists('pitch_data_sources');
         Schema::dropIfExists('discrepancies');
         Schema::dropIfExists('pitches');
         Schema::dropIfExists('stats_pitches');

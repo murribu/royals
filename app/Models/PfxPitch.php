@@ -25,7 +25,9 @@ class PfxPitch extends Model {
             $p->event_result = $line['event_result'];
             $p->ballspre = $line['ballspre'];
             $p->strikespre = $line['strikespre'];
-            $p->sequence_number = $line['sequence_number'];
+            if ($line['sequence_number'] != 'NA'){
+                $p->sequence_number = $line['sequence_number'];
+            }
             $p->at_bat_number = $line['at_bat_number'];
             $p->pbp_number = $line['pbp_number'];
             $p->pitch_name = $line['pitch_name'];
