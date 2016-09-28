@@ -17,21 +17,21 @@ use App\Models\StatsPitch;
 use App\Models\StatsPitchType;
 use App\Models\Team;
 
-class ParsePfx extends Command
+class ParseStats extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'parsepfx';
+    protected $signature = 'parsestats';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Parses pfx data';
+    protected $description = 'Parses stats data';
 
     /**
      * Create a new command instance.
@@ -50,19 +50,19 @@ class ParsePfx extends Command
      */
     public function handle() {
         
-        $csv_path = storage_path().'/pfx_sample.csv';
+        $csv_path = storage_path().'/stats_sample.csv';
         $csv = Reader::createFromPath($csv_path);
         
         $headers = $csv->fetchOne();
 
-        $max_line_number = PfxPitch::max('line_number');
+        $max_line_number = StatsPitch::max('line_number');
         $max_line_number = $max_line_number ? $max_line_number + 1 : 1;
         
         $set = $csv->setOffset($max_line_number)->setLimit(1000)->fetchAll();
         
         foreach($set as $num => $line){
             $line['line_number'] = $num + $max_line_number;
-            $result = PfxPitch::create_from_line($line, $headers);
+            $result = StatsPitch::create_from_line($line, $headers);
         }
     }
 }

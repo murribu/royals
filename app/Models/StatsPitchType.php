@@ -4,4 +4,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class StatsPitchType extends Model {
 	protected $table = 'stats_pitch_types';
+    
+    protected $fillable = ['code', 'name'];
 }

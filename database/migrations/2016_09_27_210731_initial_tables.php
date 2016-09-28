@@ -16,19 +16,19 @@ class InitialTables extends Migration
         Schema::create('stats_event_codes', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('code')->unsigned()->unique();
-            $table->string('name');
+            $table->string('name')->nullable();
             $table->timestamps();
         });
         Schema::create('stats_pitch_types', function (Blueprint $table) {
             $table->increments('id');
             $table->string('code')->unique();
-            $table->string('name');
+            $table->string('name')->nullable();
             $table->timestamps();
         });
         Schema::create('stats_batted_ball_types', function (Blueprint $table) {
             $table->increments('id');
             $table->string('code')->unique();
-            $table->string('name');
+            $table->string('name')->nullable();
             $table->timestamps();
         });
         Schema::create('players', function(Blueprint $table) {
@@ -94,9 +94,9 @@ class InitialTables extends Migration
             $table->integer('inning');
             $table->smallInteger('ballspre');
             $table->smallInteger('strikespre');
-            $table->integer('event_number');
+            $table->integer('stats_event_number');
             $table->integer('stats_sequence')->nullable();
-            $table->decimal('velocity',4,1);
+            $table->decimal('stats_velocity',4,1)->nullable();
             $table->integer('stats_pitch_type_id')->unsigned();
             $table->foreign('stats_pitch_type_id')->references('id')->on('stats_pitch_types');
             $table->integer('stats_batted_ball_type_id')->unsigned();
@@ -104,10 +104,10 @@ class InitialTables extends Migration
             $table->integer('stats_event_code_id')->unsigned();
             $table->foreign('stats_event_code_id')->references('id')->on('stats_event_codes');
             $table->date('date');
-            $table->string('home_team_abbr');
-            $table->foreign('home_team_abbr')->references('stats_abbr')->on('teams');
-            $table->string('away_team_abbr');
-            $table->foreign('away_team_abbr')->references('stats_abbr')->on('teams');
+            $table->integer('home_team_id')->unsigned();
+            $table->foreign('home_team_id')->references('id')->on('teams');
+            $table->integer('away_team_id')->unsigned();
+            $table->foreign('away_team_id')->references('id')->on('teams');
             $table->timestamps();
         });
         Schema::create('pitches', function (Blueprint $table) {
