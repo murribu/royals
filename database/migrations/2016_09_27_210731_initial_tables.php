@@ -73,11 +73,11 @@ class InitialTables extends Migration
             $table->string('event_result');
             $table->smallInteger('ballspre');
             $table->smallInteger('strikespre');
-            $table->integer('sequence_number');
+            $table->integer('sequence_number')->nullable();
             $table->integer('at_bat_number');
             $table->string('pbp_number');
             $table->string('pitch_name');
-            $table->string('game_id');
+            $table->string('game_id')->index();
             $table->string('event_type');
             $table->timestamps();
         });
@@ -102,7 +102,7 @@ class InitialTables extends Migration
             $table->foreign('stats_batted_ball_type_id')->references('id')->on('stats_batted_ball_types');
             $table->integer('stats_event_code_id')->unsigned();
             $table->foreign('stats_event_code_id')->references('id')->on('stats_event_codes');
-            $table->date('date');
+            $table->date('date')->index();
             $table->integer('home_team_id')->unsigned();
             $table->foreign('home_team_id')->references('id')->on('teams');
             $table->integer('away_team_id')->unsigned();

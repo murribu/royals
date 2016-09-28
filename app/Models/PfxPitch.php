@@ -5,6 +5,14 @@ use Illuminate\Database\Eloquent\Model;
 class PfxPitch extends Model {
 	protected $table = 'pfx_pitches';
     
+    public function batter(){
+        return $this->belongsTo('App\Models\Player', 'batter_id', 'mlb_id');
+    }
+    
+    public function pitcher(){
+        return $this->belongsTo('App\Models\Player', 'pitcher_id', 'mlb_id');
+    }
+    
     public static function create_from_line($line, $headers){
         $p = self::where('line_number', $line['line_number'])->first();
         foreach($headers as $key=>$h){

@@ -15,6 +15,7 @@ class Kernel extends ConsoleKernel
     protected $commands = [
         \App\Console\Commands\ParsePfx::class,
         \App\Console\Commands\ParseStats::class,
+        \App\Console\Commands\CompareSources::class,
     ];
 
     /**
