@@ -13,21 +13,24 @@ class InitialTables extends Migration
      */
     public function up()
     {
-        Schema::create('stats_event_codes', function (Blueprint $table) {
+        Schema::create('event_codes', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('code')->unsigned()->unique();
+            $table->integer('stats_code')->nullable()->unsigned()->index();
+            $table->string('pfx_code')->nullable()->index();
             $table->string('name')->nullable();
             $table->timestamps();
         });
-        Schema::create('stats_pitch_types', function (Blueprint $table) {
+        Schema::create('pitch_types', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('code')->unique();
+            $table->string('stats_code')->nullable()->index();
+            $table->string('pfx_code')->nullable()->index();
             $table->string('name')->nullable();
             $table->timestamps();
         });
-        Schema::create('stats_batted_ball_types', function (Blueprint $table) {
+        Schema::create('batted_ball_types', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('code')->unique();
+            $table->string('stats_code')->nullable()->index();
+            $table->string('pfx_code')->nullable()->index();
             $table->string('name')->nullable();
             $table->timestamps();
         });
@@ -97,11 +100,11 @@ class InitialTables extends Migration
             $table->integer('stats_sequence')->nullable();
             $table->decimal('stats_velocity',4,1)->nullable();
             $table->integer('stats_pitch_type_id')->unsigned();
-            $table->foreign('stats_pitch_type_id')->references('id')->on('stats_pitch_types');
+            $table->foreign('stats_pitch_type_id')->references('id')->on('pitch_types');
             $table->integer('stats_batted_ball_type_id')->unsigned();
-            $table->foreign('stats_batted_ball_type_id')->references('id')->on('stats_batted_ball_types');
+            $table->foreign('stats_batted_ball_type_id')->references('id')->on('batted_ball_types');
             $table->integer('stats_event_code_id')->unsigned();
-            $table->foreign('stats_event_code_id')->references('id')->on('stats_event_codes');
+            $table->foreign('stats_event_code_id')->references('id')->on('event_codes');
             $table->date('date')->index();
             $table->integer('home_team_id')->unsigned();
             $table->foreign('home_team_id')->references('id')->on('teams');
@@ -122,11 +125,11 @@ class InitialTables extends Migration
             $table->smallInteger('ballspre');
             $table->smallInteger('strikespre');
             $table->integer('stats_pitch_type_id')->unsigned();
-            $table->foreign('stats_pitch_type_id')->references('id')->on('stats_pitch_types');
+            $table->foreign('stats_pitch_type_id')->references('id')->on('pitch_types');
             $table->integer('stats_batted_ball_type_id')->unsigned();
-            $table->foreign('stats_batted_ball_type_id')->references('id')->on('stats_batted_ball_types');
+            $table->foreign('stats_batted_ball_type_id')->references('id')->on('batted_ball_types');
             $table->integer('stats_event_code_id')->unsigned();
-            $table->foreign('stats_event_code_id')->references('id')->on('stats_event_codes');
+            $table->foreign('stats_event_code_id')->references('id')->on('event_codes');
             $table->integer('stats_sequence')->nullable();
             $table->integer('pfx_sequence_number')->nullable();
             $table->timestamps();
@@ -170,8 +173,8 @@ class InitialTables extends Migration
         Schema::dropIfExists('games');
         Schema::dropIfExists('teams');
         Schema::dropIfExists('players');
-        Schema::dropIfExists('stats_batted_ball_types');
-        Schema::dropIfExists('stats_pitch_types');
-        Schema::dropIfExists('stats_event_codes');
+        Schema::dropIfExists('batted_ball_types');
+        Schema::dropIfExists('pitch_types');
+        Schema::dropIfExists('event_codes');
     }
 }
