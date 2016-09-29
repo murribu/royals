@@ -11,10 +11,10 @@ use App\Models\Game;
 use App\Models\PfxPitch;
 use App\Models\Pitch;
 use App\Models\Player;
-use App\Models\StatsBattedBallType;
-use App\Models\StatsEventCode;
+use App\Models\BattedBallType;
+use App\Models\EventCode;
 use App\Models\StatsPitch;
-use App\Models\StatsPitchType;
+use App\Models\PitchType;
 use App\Models\Team;
 
 class ParseStats extends Command

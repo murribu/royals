@@ -15,9 +15,9 @@ class StatsPitch extends Model {
         }else{
             $batter = Player::first_or_create_from_id_and_name($line['batter_id'], $line['batter_name']);
             $pitcher = Player::first_or_create_from_id_and_name($line['pitcher_id'], $line['pitcher_name']);
-            $pitch_type = StatsPitchType::firstOrCreate(['code' => $line['statspitchtype']]);
-            $batted_ball_type = StatsBattedBallType::firstOrCreate(['code' => $line['battedballtype']]);
-            $event = StatsEventCode::firstOrCreate(['code' => $line['event']]);
+            $pitch_type = PitchType::firstOrCreate(['stats_code' => $line['statspitchtype']]);
+            $batted_ball_type = BattedBallType::firstOrCreate(['stats_code' => $line['battedballtype']]);
+            $event = EventCode::firstOrCreate(['stats_code' => $line['event']]);
             $away_team = Team::firstOrCreate(['stats_abbr' => $line['away_team']]);
             $home_team = Team::firstOrCreate(['stats_abbr' => $line['home_team']]);
             
