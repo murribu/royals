@@ -5,5 +5,5 @@ use Illuminate\Database\Eloquent\Model;
 class BattedBallType extends Model {
 	protected $table = 'batted_ball_types';
     
-    protected $fillable = ['code', 'name'];
+    protected $fillable = ['stats_code', 'name'];
 }
