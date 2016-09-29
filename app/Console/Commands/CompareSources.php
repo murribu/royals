@@ -52,6 +52,8 @@ class CompareSources extends Command
      */
     public function handle() {
         //grab a game to parse if one needs it
+        $source_pfx = DataSource::where('name', 'Pitch F/X')->first();
+        
         $game_id = PfxPitch::whereNotIn('id', function($query){
             $query->select('data_source_table_id')
                 ->from('pitch_data_sources')
@@ -87,7 +89,7 @@ class CompareSources extends Command
                     'stats' => 'ballspre',
                 ),
             );
-            $pfx_pitches = PfxPitch::where('game_id', $game_id)->get();
+            $pfx_pitches = PfxPitch::where('game_id', $game_id)->orderBy('line_number')->get();
             foreach($pfx_pitches as $pfx){
                 //try to find the corresponding stats record
                 
@@ -109,7 +111,14 @@ class CompareSources extends Command
                     })->first();
                 // dd(DB::getQueryLog());
                 if (!$stat){
-                    
+                    $d = new Discrepancy;
+                    $d->type = 'not_found';
+                    $d->save();
+                    $dds = new DiscrepancyDataSource;
+                    $dds->discrepancy_id = $d->id;
+                    $dds->data_source_id = $source_pfx->id;
+                    $dds->data_source_table_id = $pfx->id;
+                    $dds->save();
                 }else{
                     
                 }

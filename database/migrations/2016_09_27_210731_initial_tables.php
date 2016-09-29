@@ -136,14 +136,20 @@ class InitialTables extends Migration
         });
         Schema::create('discrepancies', function(Blueprint $table) {
             $table->increments('id');
-            $table->integer('pitch_id')->unsigned();
+            $table->integer('pitch_id')->nullable()->unsigned();
             $table->foreign('pitch_id')->references('id')->on('pitches');
-            $table->string('column_name');
-            $table->integer('pfx_pitch_id')->unsigned();
-            $table->foreign('pfx_pitch_id')->references('id')->on('pfx_pitches');
-            $table->integer('stats_pitch_id')->unsigned();
-            $table->foreign('stats_pitch_id')->references('id')->on('pfx_pitches');
+            $table->string('column_name')->nullable();
             $table->datetime('resolved')->nullable()->index();
+            $table->enum('type', ['not_found', 'bad_data']);
+            $table->timestamps();
+        });
+        Schema::create('discrepancy_data_sources', function(Blueprint $table) {
+            $table->increments('id');
+            $table->integer('discrepancy_id')->unsigned();
+            $table->foreign('discrepancy_id')->references('id')->on('discrepancies');
+            $table->integer('data_source_id')->unsigned();
+            $table->foreign('data_source_id')->references('id')->on('data_sources');
+            $table->integer('data_source_table_id')->unsigned()->index();
             $table->timestamps();
         });
         Schema::create('pitch_data_sources', function(Blueprint $table) {
