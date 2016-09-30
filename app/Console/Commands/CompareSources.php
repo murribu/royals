@@ -7,16 +7,24 @@ use Illuminate\Console\Command;
 
 use League\Csv\Reader;
 
+use App\Models\BattedBallType;
 use App\Models\DataSource;
+use App\Models\DataSourceBattedBallType;
+use App\Models\DataSourceBattedBallTypeMatch;
+use App\Models\DataSourceEventCode;
+use App\Models\DataSourceEventCodeMatch;
+use App\Models\DataSourcePitchType;
+use App\Models\DataSourcePitchTypeMatch;
 use App\Models\Discrepancy;
+use App\Models\DiscrepanyDataSource;
+use App\Models\EventCode;
 use App\Models\Game;
 use App\Models\PfxPitch;
 use App\Models\Pitch;
-use App\Models\Player;
-use App\Models\BattedBallType;
-use App\Models\EventCode;
-use App\Models\StatsPitch;
+use App\Models\PitchResultType;
 use App\Models\PitchType;
+use App\Models\Player;
+use App\Models\StatsPitch;
 use App\Models\Team;
 
 class CompareSources extends Command
@@ -26,7 +34,7 @@ class CompareSources extends Command
      *
      * @var string
      */
-    protected $signature = 'comparesources';
+    protected $signature = 'comparesources {--startover : Truncate tables before comparing}';
 
     /**
      * The console command description.
@@ -52,10 +60,29 @@ class CompareSources extends Command
      */
     public function handle() {
         //grab a game to parse if one needs it
+        $startover = $this->option('startover');
+        if ($startover){
+            $answer = $this->ask('Are you sure you want to start over? (y/N)');
+            if ($answer == 'y'){
+                $tables = array(
+                    'pitch_data_sources',
+                    'discrepancy_data_sources',
+                    'discrepancies',
+                    'pitches',
+                    
+                );
+                foreach($tables as $table){
+                    DB::statement("DELETE FROM ".$table);
+                    $this->info($table.' emptied');
+                }
+            }else{
+                $this->info('This command didn\'t do anything');
+                return;
+            }
+        }
         $source_pfx = DataSource::where('name', 'Pitch F/X')->first();
         $source_stats = DataSource::where('name', 'Stats')->first();
         
-        DB::enableQueryLog();
         $game_id = PfxPitch::whereNotIn('id', function($query){
             $query->select('data_source_table_id')
                 ->from('pitch_data_sources')
@@ -74,7 +101,6 @@ class CompareSources extends Command
                 });
         })->select('game_id')
         ->first();
-        dd(DB::getQueryLog());
         $game_id = $game_id['game_id'];
         
         if ($game_id){
@@ -109,11 +135,17 @@ class CompareSources extends Command
                                     ->where('name', 'Stats');
                             });
                     })->whereNotIn('id', function($query){
-                        $query->select('pfx_pitch_id')
-                            ->from('discrepancies');
+                        $query->select('data_source_table_id')
+                            ->from('discrepancy_data_sources')
+                            ->where('data_source_id', function($query2){
+                                $query2->select('id')
+                                    ->from('data_sources')
+                                    ->where('name', 'Pitch F/X');
+                            });
                     })->first();
-                // dd(DB::getQueryLog());
                 if (!$stat){
+                    //This shouldn't ever happen.
+                    
                     $d = new Discrepancy;
                     $d->type = 'not_found';
                     $d->save();
@@ -123,7 +155,7 @@ class CompareSources extends Command
                     $dds->data_source_table_id = $pfx->id;
                     $dds->save();
                 }else{
-                    $pitch = Pitch::where('id', function($query){
+                    $pitch = Pitch::where('id', function($query) use ($source_pfx, $pfx){
                         $query->select('pitch_id')
                             ->from('pitch_data_sources')
                             ->where('data_source_id', $source_pfx->id)
@@ -174,10 +206,13 @@ class CompareSources extends Command
                         $data_source_pitch_type = DataSourcePitchType::where('data_source_id', $source_pfx->id)
                             ->where('code', $pfx->pitch_name)
                             ->first();
+                        $pitch_type = $data_source_pitch_type->pitch_type();
+                        $event_code = DataSourceEventCode::where('data_source_id', $source_pfx->id)
+                            ->where('code', $pfx->event_result)
+                            ->first();
+                        $pitch_result_type = PitchResultType::where('code', $pfx->event_type)->first();
                         
-                        $pitch_type = $data_source_pitch_type->pitch_type;
-                        dd($pitch_type);
-                        
+                        dd($pfx);
                         DB::beginTransaction();
                         $pitch = new Pitch;
                         $pitch->game_id = $game->id;
@@ -189,7 +224,18 @@ class CompareSources extends Command
                         $pitch->strikespre = $pfx->strikespre;
                         $pitch->strikespre = $pfx->strikespre;
                         $pitch->pitch_type_id = $pitch_type->id;
+                        $pitch->event_code_id = $event_code->id;
+                        $pitch->pitch_result_type_id = $pitch_result_type->id;
+                        $pitch->save();
+                        
+                        $pitch_ds = new PitchDataSource;
+                        $pitch_ds->pitch_id = $pitch->id;
+                        $pitch_ds->data_source_id = $source_pfx->id;
+                        $pitch_ds->data_source_table_id = $pfx->id;
+                        $pitch_ds->save();
                         DB::commit();
+                        
+                        dd($pfx->initial_speed);
                     }
                     foreach($auto_columns as $col){
                         if ($pfx->{$col['pfx']} != $stat->{$col['stats']}){

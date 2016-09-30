@@ -105,71 +105,74 @@ class InitialTables extends Migration
         });
         Schema::create('pfx_pitches', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('line_number')->unsigned()->index();
-            $table->string('batter_name');
-            $table->integer('batter_id')->unsigned();
+            $table->integer('line_number')->nullable()->unsigned()->index();
+            $table->string('batter_name')->nullable();
+            $table->integer('batter_id')->nullable()->unsigned();
             $table->foreign('batter_id')->references('mlb_id')->on('players');
-            $table->string('pitcher_name');
-            $table->integer('pitcher_id')->unsigned();
+            $table->string('pitcher_name')->nullable();
+            $table->integer('pitcher_id')->nullable()->unsigned();
             $table->foreign('pitcher_id')->references('mlb_id')->on('players');
-            $table->integer('inning');
-            $table->string('event_result');
-            $table->smallInteger('ballspre');
-            $table->smallInteger('strikespre');
+            $table->integer('inning')->nullable();
+            $table->string('event_result')->nullable();
+            $table->smallInteger('ballspre')->nullable();
+            $table->smallInteger('strikespre')->nullable();
             $table->integer('sequence_number')->nullable();
-            $table->integer('at_bat_number');
-            $table->string('pbp_number');
-            $table->string('pitch_name');
-            $table->string('game_id')->index();
-            $table->string('event_type');
+            $table->integer('at_bat_number')->nullable();
+            $table->string('pbp_number')->nullable();
+            $table->string('initial_speed')->nullable();
+            $table->string('pitch_name')->nullable();
+            $table->string('game_id')->nullable()->index();
+            $table->string('event_type')->nullable();
             $table->timestamps();
         });
         Schema::create('stats_pitches', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('line_number')->unsigned()->index();
-            $table->string('batter_name');
-            $table->integer('batter_id')->unsigned();
+            $table->integer('line_number')->nullable()->unsigned()->index();
+            $table->string('batter_name')->nullable();
+            $table->integer('batter_id')->nullable()->unsigned();
             $table->foreign('batter_id')->references('mlb_id')->on('players');
-            $table->string('pitcher_name');
-            $table->integer('pitcher_id')->unsigned();
+            $table->string('pitcher_name')->nullable();
+            $table->integer('pitcher_id')->nullable()->unsigned();
             $table->foreign('pitcher_id')->references('mlb_id')->on('players');
-            $table->integer('inning');
-            $table->smallInteger('ballspre');
-            $table->smallInteger('strikespre');
-            $table->integer('stats_event_number');
+            $table->integer('inning')->nullable();
+            $table->smallInteger('ballspre')->nullable();
+            $table->smallInteger('strikespre')->nullable();
+            $table->integer('stats_event_number')->nullable();
             $table->integer('stats_sequence')->nullable();
             $table->decimal('stats_velocity',4,1)->nullable();
-            $table->integer('stats_pitch_type_id')->unsigned();
+            $table->integer('stats_pitch_type_id')->nullable()->unsigned();
             $table->foreign('stats_pitch_type_id')->references('id')->on('pitch_types');
-            $table->integer('stats_batted_ball_type_id')->unsigned();
+            $table->integer('stats_batted_ball_type_id')->nullable()->unsigned();
             $table->foreign('stats_batted_ball_type_id')->references('id')->on('batted_ball_types');
-            $table->integer('stats_event_code_id')->unsigned();
+            $table->integer('stats_event_code_id')->nullable()->unsigned();
             $table->foreign('stats_event_code_id')->references('id')->on('event_codes');
-            $table->date('date')->index();
-            $table->integer('home_team_id')->unsigned();
+            $table->date('date')->nullable()->index();
+            $table->integer('home_team_id')->nullable()->unsigned();
             $table->foreign('home_team_id')->references('id')->on('teams');
-            $table->integer('away_team_id')->unsigned();
+            $table->integer('away_team_id')->nullable()->unsigned();
             $table->foreign('away_team_id')->references('id')->on('teams');
             $table->timestamps();
         });
         Schema::create('pitches', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('game_id')->unsigned();
+            $table->integer('game_id')->nullable()->unsigned();
             $table->foreign('game_id')->references('id')->on('games');
-            $table->integer('batter_id')->unsigned();
+            $table->integer('batter_id')->nullable()->unsigned();
             $table->foreign('batter_id')->references('id')->on('players');
-            $table->integer('pitcher_id')->unsigned();
+            $table->integer('pitcher_id')->nullable()->unsigned();
             $table->foreign('pitcher_id')->references('id')->on('players');
-            $table->integer('inning');
-            $table->decimal('velocity',4,1);
-            $table->smallInteger('ballspre');
-            $table->smallInteger('strikespre');
-            $table->integer('pitch_type_id')->unsigned();
+            $table->integer('inning')->nullable();
+            $table->decimal('velocity',4,1)->nullable();
+            $table->smallInteger('ballspre')->nullable();
+            $table->smallInteger('strikespre')->nullable();
+            $table->integer('pitch_type_id')->nullable()->unsigned();
             $table->foreign('pitch_type_id')->references('id')->on('pitch_types');
             $table->integer('batted_ball_type_id')->nullable()->unsigned();
             $table->foreign('batted_ball_type_id')->references('id')->on('batted_ball_types');
-            $table->integer('event_code_id')->unsigned();
+            $table->integer('event_code_id')->nullable()->unsigned();
             $table->foreign('event_code_id')->references('id')->on('event_codes');
+            $table->integer('pitch_result_type_id')->nullable()->unsigned();
+            $table->foreign('pitch_result_type_id')->references('id')->on('pitch_result_types');
             $table->timestamps();
         });
         Schema::create('discrepancies', function(Blueprint $table) {
@@ -199,6 +202,16 @@ class InitialTables extends Migration
             $table->integer('data_source_table_id')->index();
             $table->timestamps();
         });
+        Schema::create('pitch_result_types', function (Blueprint $table) {
+            $table->increments('id');
+            $table->string('name');
+            $table->string('code');
+            $table->tinyInteger('ball')->default(0);
+            $table->tinyInteger('strike')->default(0);
+            $table->tinyInteger('foul')->default(0);
+            $table->tinyInteger('end')->default(0);
+            $table->timestamps();
+        });
     }
 
     /**
@@ -208,6 +221,7 @@ class InitialTables extends Migration
      */
     public function down()
     {
+        Schema::dropIfExists('pitch_result_types');
         Schema::dropIfExists('pitch_data_sources');
         Schema::dropIfExists('discrepancy_data_sources');
         Schema::dropIfExists('discrepancies');
