@@ -5,6 +5,14 @@ use Illuminate\Database\Eloquent\Model;
 class StatsPitch extends Model {
 	protected $table = 'stats_pitches';
     
+    public function event_code(){
+        return $this->belongsTo('App\Models\EventCode', 'stats_event_code_id');
+    }
+    
+    public function pitch_type(){
+        return $this->belongsTo('App\Models\PitchType', 'stats_pitch_type_id');
+    }
+    
     public static function create_from_line($line, $headers){
         $p = self::where('line_number', $line['line_number'])->first();
         $source_stats = DataSource::where('name', 'Stats')->first();

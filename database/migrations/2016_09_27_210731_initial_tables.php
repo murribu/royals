@@ -189,7 +189,7 @@ class InitialTables extends Migration
             $table->increments('id');
             $table->integer('pitch_id')->nullable()->unsigned();
             $table->foreign('pitch_id')->references('id')->on('pitches');
-            $table->string('column_name')->nullable();
+            $table->string('column_name')->nullable()->index();
             $table->datetime('resolved')->nullable()->index();
             $table->enum('type', ['not_found', 'bad_data']);
             $table->timestamps();

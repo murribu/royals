@@ -16,11 +16,12 @@ use App\Models\DataSourceEventCodeMatch;
 use App\Models\DataSourcePitchType;
 use App\Models\DataSourcePitchTypeMatch;
 use App\Models\Discrepancy;
-use App\Models\DiscrepanyDataSource;
+use App\Models\DiscrepancyDataSource;
 use App\Models\EventCode;
 use App\Models\Game;
 use App\Models\PfxPitch;
 use App\Models\Pitch;
+use App\Models\PitchDataSource;
 use App\Models\PitchResultType;
 use App\Models\PitchType;
 use App\Models\Player;
@@ -105,18 +106,9 @@ class CompareSources extends Command
         
         if ($game_id){
             $auto_columns = array(
-                array(
-                    'pfx'   => 'inning',
-                    'stats' => 'inning',
-                ),
-                array(
-                    'pfx'   => 'ballspre',
-                    'stats' => 'ballspre',
-                ),
-                array(
-                    'pfx'   => 'strikespre',
-                    'stats' => 'strikespre',
-                ),
+                'inning',
+                'ballspre',
+                'strikespre',
             );
             $pfx_pitches = PfxPitch::where('game_id', $game_id)->orderBy('line_number')->get();
             foreach($pfx_pitches as $pfx){
@@ -146,6 +138,7 @@ class CompareSources extends Command
                 if (!$stat){
                     //This shouldn't ever happen.
                     
+                    DB::beginTransaction();
                     $d = new Discrepancy;
                     $d->type = 'not_found';
                     $d->save();
@@ -154,6 +147,7 @@ class CompareSources extends Command
                     $dds->data_source_id = $source_pfx->id;
                     $dds->data_source_table_id = $pfx->id;
                     $dds->save();
+                    DB::commit();
                 }else{
                     $pitch = Pitch::where('id', function($query) use ($source_pfx, $pfx){
                         $query->select('pitch_id')
@@ -174,9 +168,9 @@ class CompareSources extends Command
                             $home_team = Team::where('pfx_abbr', substr($pfx->game_id, 19, 6))->first();
                             if (!$home_team){
                                 $home_team = new Team;
-                                $home_team->pfx_abbr = substr($pfx->game_id, 19, 6);
+                                $home_team->pfx_abbr = substr($pfx->game_id, 18, 6);
                                 $home_team->save();
-                                $this->info('Added Team '.substr($pfx->game_id, 19, 6));
+                                $this->info('Added Team '.substr($pfx->game_id, 18, 6));
                             }
                             $game = new Game;
                             $game->pfx_id = $pfx->game_id;
@@ -206,13 +200,19 @@ class CompareSources extends Command
                         $data_source_pitch_type = DataSourcePitchType::where('data_source_id', $source_pfx->id)
                             ->where('code', $pfx->pitch_name)
                             ->first();
+                        if (!$data_source_pitch_type){
+                            dd("Pitch Type not found ".$pfx->pitch_name);
+                        }
                         $pitch_type = $data_source_pitch_type->pitch_type();
-                        $event_code = DataSourceEventCode::where('data_source_id', $source_pfx->id)
+                        $data_source_event_code = DataSourceEventCode::where('data_source_id', $source_pfx->id)
                             ->where('code', $pfx->event_result)
                             ->first();
+                        if (!$data_source_event_code){
+                            dd("Event Code not found ".$pfx->event_result);
+                        }
+                        $event_code = $data_source_event_code->event_code();
                         $pitch_result_type = PitchResultType::where('code', $pfx->event_type)->first();
                         
-                        dd($pfx);
                         DB::beginTransaction();
                         $pitch = new Pitch;
                         $pitch->game_id = $game->id;
@@ -235,20 +235,34 @@ class CompareSources extends Command
                         $pitch_ds->save();
                         DB::commit();
                         
-                        dd($pfx->initial_speed);
                     }
                     foreach($auto_columns as $col){
-                        if ($pfx->{$col['pfx']} != $stat->{$col['stats']}){
-                            $d = new Discrepancy;
-                            $d->type = 'bad_data';
-                            // $d->
+                        if ($pfx->{$col} != $stat->{$col}){
+                            $d = Discrepancy::create_from_bad_data($col, $pitch, $pfx, $stat);
                         }
                     }
+                    // event_result	
+                    if ($pfx->event_result != 'NA'){
+                        //It's the end of a PA
+                        if (!$data_source_event_code->does_match($stat->event_code, $source_stats)){
+                            $d = Discrepancy::create_from_bad_data('event_code', $pitch, $pfx, $stat);
+                        }
+                    }
+                    // sequence_number	- NAH
+                    // at_bat_number	- NAH
+                    // pbp_number	    - NAH
+                    // initial_speed	
+                    if (abs($pfx->initial_speed - $stat->stats_velocity) > 1){
+                        $d = Discrepancy::create_from_bad_data('velocity', $pitch, $pfx, $stat);
+                    }
+                    // pitch_name	
+                    if (!$data_source_pitch_type->does_match($stat->pitch_type, $source_stats)){
+                        $d = Discrepancy::create_from_bad_data('pitch_type', $pitch, $pfx, $stat);
+                    }
+
                 }
-                var_dump($stat);
-                
-                return;
             }
+            $this->info('Parsed '.$game_id);
         }
     }
 }

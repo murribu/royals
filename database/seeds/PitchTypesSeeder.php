@@ -26,10 +26,10 @@ class PitchTypesSeeder extends Seeder{
                 'name' => 'Slider',
                 'matches' => array(
                     'pfx' => array(
-                        'Sinker'
+                        'Slider'
                     ),
                     'stats' => array(
-                        'N'
+                        'S'
                     ),
                 ),
             ),

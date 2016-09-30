@@ -537,7 +537,8 @@ class EventCodesSeeder extends Seeder{
                         '16'
                     ),
                     'pfx' => array(
-                        'strikeout'
+                        'strikeout',
+                        'strikeout_double_play',
                     ),
                 ),
             ),
@@ -582,6 +583,30 @@ class EventCodesSeeder extends Seeder{
                     ),
                     'pfx' => array(
                         'wild_pitch'
+                    ),
+                ),
+            ),
+            array(
+                'name' => 'Passed Ball',
+                'matches' => array(
+                    'stats' => array(
+                        '4'
+                    ),
+                    'pfx' => array(
+                        'passed_ball'
+                    ),
+                ),
+            ),
+            array(
+                'name' => 'Stolen Base',
+                'matches' => array(
+                    'stats' => array(
+                        '17'
+                    ),
+                    'pfx' => array(
+                        'stolen_base_2b',
+                        'stolen_base_3b',
+                        'stolen_base_home',
                     ),
                 ),
             ),
