@@ -153,6 +153,16 @@ class InitialTables extends Migration
             $table->foreign('away_team_id')->references('id')->on('teams');
             $table->timestamps();
         });
+        Schema::create('pitch_result_types', function (Blueprint $table) {
+            $table->increments('id');
+            $table->string('name');
+            $table->string('code');
+            $table->tinyInteger('ball')->default(0);
+            $table->tinyInteger('strike')->default(0);
+            $table->tinyInteger('foul')->default(0);
+            $table->tinyInteger('end')->default(0);
+            $table->timestamps();
+        });
         Schema::create('pitches', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('game_id')->nullable()->unsigned();
@@ -202,16 +212,6 @@ class InitialTables extends Migration
             $table->integer('data_source_table_id')->index();
             $table->timestamps();
         });
-        Schema::create('pitch_result_types', function (Blueprint $table) {
-            $table->increments('id');
-            $table->string('name');
-            $table->string('code');
-            $table->tinyInteger('ball')->default(0);
-            $table->tinyInteger('strike')->default(0);
-            $table->tinyInteger('foul')->default(0);
-            $table->tinyInteger('end')->default(0);
-            $table->timestamps();
-        });
     }
 
     /**
@@ -221,11 +221,11 @@ class InitialTables extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('pitch_result_types');
         Schema::dropIfExists('pitch_data_sources');
         Schema::dropIfExists('discrepancy_data_sources');
         Schema::dropIfExists('discrepancies');
         Schema::dropIfExists('pitches');
+        Schema::dropIfExists('pitch_result_types');
         Schema::dropIfExists('stats_pitches');
         Schema::dropIfExists('pfx_pitches');
         Schema::dropIfExists('games');
