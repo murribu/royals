@@ -220,7 +220,7 @@ class InitialTables extends Migration
         Schema::dropIfExists('data_source_batted_ball_type_matches');
         Schema::dropIfExists('data_source_batted_ball_types');
         Schema::dropIfExists('batted_ball_types');
-        Schema::dropIfExists('event_code_matches');
+        Schema::dropIfExists('data_source_event_code_matches');
         Schema::dropIfExists('data_source_event_codes');
         Schema::dropIfExists('event_codes');
         Schema::dropIfExists('data_source_pitch_type_matches');
