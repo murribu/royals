@@ -237,6 +237,7 @@ class InitialTables extends Migration
         Schema::dropIfExists('pfx_pitches');
         Schema::dropIfExists('games');
         Schema::dropIfExists('teams');
+        Schema::dropIfExists('leagues');
         Schema::dropIfExists('players');
         Schema::dropIfExists('data_source_batted_ball_type_matches');
         Schema::dropIfExists('data_source_batted_ball_types');
