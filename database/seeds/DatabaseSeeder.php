@@ -14,5 +14,6 @@ class DatabaseSeeder extends Seeder
         $this->call('DataSourcesSeeder');
         $this->call('EventCodesSeeder');
         $this->call('PitchTypesSeeder');
+        $this->call('BattedBallTypesSeeder');
     }
 }
