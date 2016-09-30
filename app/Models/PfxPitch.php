@@ -38,6 +38,7 @@ class PfxPitch extends Model {
             }
             $p->at_bat_number = $line['at_bat_number'];
             $p->pbp_number = $line['pbp_number'];
+            $p->initial_speed = $line['initial_speed'];
             $p->pitch_name = $line['pitch_name'];
             $p->game_id = $line['game_id'];
             $p->event_type = $line['event_type'];
