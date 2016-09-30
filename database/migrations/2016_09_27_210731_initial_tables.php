@@ -85,12 +85,19 @@ class InitialTables extends Migration
             $table->string('last_name');
             $table->timestamps();
         });
+        Schema::create('leagues', function(Blueprint $table) {
+            $table->increments('id');
+            $table->string('name');
+            $table->timestamps();
+        });
         Schema::create('teams', function(Blueprint $table) {
             $table->increments('id');
             $table->string('stats_abbr')->nullable()->index();
             $table->string('pfx_abbr')->nullable()->index();
             $table->string('location')->nullable();
             $table->string('name')->nullable();
+            $table->integer('league_id')->unsigned();
+            $table->foreign('league_id')->references('id')->on('leagues');
             $table->timestamps();
         });
         Schema::create('games', function(Blueprint $table) {
