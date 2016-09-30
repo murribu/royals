@@ -50,7 +50,7 @@ class InitialTables extends Migration
             $table->string('code')->index();
             $table->timestamps();
         });
-        Schema::create('event_code_matches', function(Blueprint $table) {
+        Schema::create('data_source_event_code_matches', function(Blueprint $table) {
             $table->increments('id');
             $table->integer('event_code_id')->unsigned();
             $table->foreign('event_code_id')->references('id')->on('event_codes');
