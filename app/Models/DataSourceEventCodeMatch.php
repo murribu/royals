@@ -6,4 +6,8 @@ class DataSourceEventCodeMatch extends Model {
 	protected $table = 'data_source_event_code_matches';
     
     protected $fillable = ['event_code_id', 'data_source_event_code_id'];
+    
+    public function event_code(){
+        return $this->belongsTo('App\Models\EventCode');
+    }
 }

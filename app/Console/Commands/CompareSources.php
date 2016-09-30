@@ -53,7 +53,9 @@ class CompareSources extends Command
     public function handle() {
         //grab a game to parse if one needs it
         $source_pfx = DataSource::where('name', 'Pitch F/X')->first();
+        $source_stats = DataSource::where('name', 'Stats')->first();
         
+        DB::enableQueryLog();
         $game_id = PfxPitch::whereNotIn('id', function($query){
             $query->select('data_source_table_id')
                 ->from('pitch_data_sources')
@@ -63,11 +65,16 @@ class CompareSources extends Command
                         ->where('name', 'Pitch F/X');
                 });
         })->whereNotIn('id', function($query){
-            $query->select('pfx_pitch_id')
-                ->from('discrepancies');
+            $query->select('data_source_table_id')
+                ->from('discrepancy_data_sources')
+                ->where('data_source_id', function($query2){
+                    $query2->select('id')
+                        ->from('data_sources')
+                        ->where('name', 'Pitch F/X');
+                });
         })->select('game_id')
         ->first();
-        
+        dd(DB::getQueryLog());
         $game_id = $game_id['game_id'];
         
         if ($game_id){
@@ -164,14 +171,13 @@ class CompareSources extends Command
                             $pitcher->save();
                             $this->info('Added Player '.$pfx->pitcher_name);
                         }
-                        $pitch_type = PitchType::where('pfx_code', $pfx->pitch_name)->first();
-                        if (!$pitch_type){
-                            $pitch_type = new PitchType;
-                            $pitch_type->pfx_code = $pfx->pitch_name;
-                            $pitch_type->save();
-                            $this->info('Added PitchType '.$pfx->pitch_name);
-                        }
-                        $batted_ball_type = BattedBallType::where('pfx_code', $pfx->event_result)->first();
+                        $data_source_pitch_type = DataSourcePitchType::where('data_source_id', $source_pfx->id)
+                            ->where('code', $pfx->pitch_name)
+                            ->first();
+                        
+                        $pitch_type = $data_source_pitch_type->pitch_type;
+                        dd($pitch_type);
+                        
                         DB::beginTransaction();
                         $pitch = new Pitch;
                         $pitch->game_id = $game->id;
@@ -183,7 +189,6 @@ class CompareSources extends Command
                         $pitch->strikespre = $pfx->strikespre;
                         $pitch->strikespre = $pfx->strikespre;
                         $pitch->pitch_type_id = $pitch_type->id;
-                        // $pitch->batted_ball_type_id = $
                         DB::commit();
                     }
                     foreach($auto_columns as $col){
