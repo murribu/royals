@@ -11,7 +11,7 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-        $this->call('EventCodesSeeder');
         $this->call('DataSourcesSeeder');
+        $this->call('PitchTypesSeeder');
     }
 }

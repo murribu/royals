@@ -13,25 +13,69 @@ class InitialTables extends Migration
      */
     public function up()
     {
-        Schema::create('event_codes', function (Blueprint $table) {
+        Schema::create('data_sources', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('stats_code')->nullable()->unsigned()->index();
-            $table->string('pfx_code')->nullable()->index();
-            $table->string('name')->nullable();
+            $table->string('name');
             $table->timestamps();
         });
         Schema::create('pitch_types', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('stats_code')->nullable()->index();
-            $table->string('pfx_code')->nullable()->index();
             $table->string('name')->nullable();
+            $table->timestamps();
+        });
+        Schema::create('data_source_pitch_types', function(Blueprint $table) {
+            $table->increments('id');
+            $table->integer('data_source_id')->unsigned();
+            $table->foreign('data_source_id')->references('id')->on('data_sources');
+            $table->string('code')->index();
+            $table->timestamps();
+        });
+        Schema::create('data_source_pitch_type_matches', function(Blueprint $table) {
+            $table->increments('id');
+            $table->integer('pitch_type_id')->unsigned();
+            $table->foreign('pitch_type_id')->references('id')->on('pitch_types');
+            $table->integer('data_source_pitch_type_id')->unsigned();
+            $table->foreign('data_source_pitch_type_id')->references('id')->on('data_source_pitch_types');
+            $table->timestamps();
+        });
+        Schema::create('event_codes', function (Blueprint $table) {
+            $table->increments('id');
+            $table->string('name')->nullable();
+            $table->timestamps();
+        });
+        Schema::create('data_source_event_codes', function(Blueprint $table) {
+            $table->increments('id');
+            $table->integer('data_source_id')->unsigned();
+            $table->foreign('data_source_id')->references('id')->on('data_sources');
+            $table->string('code')->index();
+            $table->timestamps();
+        });
+        Schema::create('event_code_matches', function(Blueprint $table) {
+            $table->increments('id');
+            $table->integer('event_code_id')->unsigned();
+            $table->foreign('event_code_id')->references('id')->on('event_codes');
+            $table->integer('data_source_event_code_id')->unsigned();
+            $table->foreign('data_source_event_code_id')->references('id')->on('data_source_event_codes');
             $table->timestamps();
         });
         Schema::create('batted_ball_types', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('stats_code')->nullable()->index();
-            $table->string('pfx_code')->nullable()->index();
             $table->string('name')->nullable();
+            $table->timestamps();
+        });
+        Schema::create('data_source_batted_ball_types', function(Blueprint $table) {
+            $table->increments('id');
+            $table->integer('data_source_id')->unsigned();
+            $table->foreign('data_source_id')->references('id')->on('data_sources');
+            $table->string('code')->index();
+            $table->timestamps();
+        });
+        Schema::create('data_source_batted_ball_type_matches', function(Blueprint $table) {
+            $table->increments('id');
+            $table->integer('batted_ball_type_id')->unsigned();
+            $table->foreign('batted_ball_type_id')->references('id')->on('batted_ball_types');
+            $table->integer('data_source_batted_ball_type_id')->unsigned();
+            $table->foreign('data_source_batted_ball_type_id', 'data_source_batted_ball_type_matches_type_id_foreign')->references('id')->on('data_source_batted_ball_types');
             $table->timestamps();
         });
         Schema::create('players', function(Blueprint $table) {
@@ -55,12 +99,8 @@ class InitialTables extends Migration
             $table->foreign('home_team_id')->references('id')->on('teams');
             $table->integer('away_team_id')->unsigned();
             $table->foreign('away_team_id')->references('id')->on('teams');
+            $table->string('pfx_id')->index();
             $table->date('date');
-            $table->timestamps();
-        });
-        Schema::create('data_sources', function (Blueprint $table) {
-            $table->increments('id');
-            $table->string('name');
             $table->timestamps();
         });
         Schema::create('pfx_pitches', function (Blueprint $table) {
@@ -124,14 +164,12 @@ class InitialTables extends Migration
             $table->decimal('velocity',4,1);
             $table->smallInteger('ballspre');
             $table->smallInteger('strikespre');
-            $table->integer('stats_pitch_type_id')->unsigned();
-            $table->foreign('stats_pitch_type_id')->references('id')->on('pitch_types');
-            $table->integer('stats_batted_ball_type_id')->unsigned();
-            $table->foreign('stats_batted_ball_type_id')->references('id')->on('batted_ball_types');
-            $table->integer('stats_event_code_id')->unsigned();
-            $table->foreign('stats_event_code_id')->references('id')->on('event_codes');
-            $table->integer('stats_sequence')->nullable();
-            $table->integer('pfx_sequence_number')->nullable();
+            $table->integer('pitch_type_id')->unsigned();
+            $table->foreign('pitch_type_id')->references('id')->on('pitch_types');
+            $table->integer('batted_ball_type_id')->nullable()->unsigned();
+            $table->foreign('batted_ball_type_id')->references('id')->on('batted_ball_types');
+            $table->integer('event_code_id')->unsigned();
+            $table->foreign('event_code_id')->references('id')->on('event_codes');
             $table->timestamps();
         });
         Schema::create('discrepancies', function(Blueprint $table) {
@@ -171,16 +209,23 @@ class InitialTables extends Migration
     public function down()
     {
         Schema::dropIfExists('pitch_data_sources');
+        Schema::dropIfExists('discrepancy_data_sources');
         Schema::dropIfExists('discrepancies');
         Schema::dropIfExists('pitches');
         Schema::dropIfExists('stats_pitches');
         Schema::dropIfExists('pfx_pitches');
-        Schema::dropIfExists('data_sources');
         Schema::dropIfExists('games');
         Schema::dropIfExists('teams');
         Schema::dropIfExists('players');
+        Schema::dropIfExists('data_source_batted_ball_type_matches');
+        Schema::dropIfExists('data_source_batted_ball_types');
         Schema::dropIfExists('batted_ball_types');
-        Schema::dropIfExists('pitch_types');
+        Schema::dropIfExists('event_code_matches');
+        Schema::dropIfExists('data_source_event_codes');
         Schema::dropIfExists('event_codes');
+        Schema::dropIfExists('data_source_pitch_type_matches');
+        Schema::dropIfExists('data_source_pitch_types');
+        Schema::dropIfExists('pitch_types');
+        Schema::dropIfExists('data_sources');
     }
 }

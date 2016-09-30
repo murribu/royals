@@ -71,22 +71,18 @@ class CompareSources extends Command
         $game_id = $game_id['game_id'];
         
         if ($game_id){
-            $columns = array(
-                array(
-                    'pfx'   => 'batter_id',
-                    'stats' => 'batter_id',
-                ),
+            $auto_columns = array(
                 array(
                     'pfx'   => 'inning',
                     'stats' => 'inning',
                 ),
                 array(
-                    'pfx'   => '$[![col]!]',
-                    'stats' => '$[![col]!]',
-                ),
-                array(
                     'pfx'   => 'ballspre',
                     'stats' => 'ballspre',
+                ),
+                array(
+                    'pfx'   => 'strikespre',
+                    'stats' => 'strikespre',
                 ),
             );
             $pfx_pitches = PfxPitch::where('game_id', $game_id)->orderBy('line_number')->get();
@@ -120,7 +116,83 @@ class CompareSources extends Command
                     $dds->data_source_table_id = $pfx->id;
                     $dds->save();
                 }else{
-                    
+                    $pitch = Pitch::where('id', function($query){
+                        $query->select('pitch_id')
+                            ->from('pitch_data_sources')
+                            ->where('data_source_id', $source_pfx->id)
+                            ->where('data_source_table_id', $pfx->id);
+                    })->first();
+                    if (!$pitch){
+                        $game = Game::where('pfx_id', $pfx->game_id)->first();
+                        if (!$game){
+                            $away_team = Team::where('pfx_abbr', substr($pfx->game_id, 11, 6))->first();
+                            if (!$away_team){
+                                $away_team = new Team;
+                                $away_team->pfx_abbr = substr($pfx->game_id, 11, 6);
+                                $away_team->save();
+                                $this->info('Added Team '.substr($pfx->game_id, 11, 6));
+                            }
+                            $home_team = Team::where('pfx_abbr', substr($pfx->game_id, 19, 6))->first();
+                            if (!$home_team){
+                                $home_team = new Team;
+                                $home_team->pfx_abbr = substr($pfx->game_id, 19, 6);
+                                $home_team->save();
+                                $this->info('Added Team '.substr($pfx->game_id, 19, 6));
+                            }
+                            $game = new Game;
+                            $game->pfx_id = $pfx->game_id;
+                            $game->home_team_id = $home_team->id;
+                            $game->away_team_id = $away_team->id;
+                            $game->date = substr($pfx->game_id, 0, 4)."-".substr($pfx->game_id, 5, 2)."-".substr($pfx->game_id, 8, 2);
+                            $game->save();
+                        }
+                        $batter = Player::where('mlb_id', $pfx->batter_id)->first();
+                        if (!$batter){
+                            $batter = new Player;
+                            $batter->mlb_id = $pfx->batter_id;
+                            $batter->first_name = substr($pfx->batter_name, strpos($pfx->batter_name, ',') + 2);
+                            $batter->last_name = substr($pfx->batter_name, 0, strpos($pfx->batter_name, ','));
+                            $batter->save();
+                            $this->info('Added Player '.$pfx->batter_name);
+                        }
+                        $pitcher = Player::where('mlb_id', $pfx->pitcher_id)->first();
+                        if (!$pitcher){
+                            $pitcher = new Player;
+                            $pitcher->mlb_id = $pfx->batter_id;
+                            $pitcher->first_name = substr($pfx->pitcher_name, strpos($pfx->pitcher_name, ',') + 2);
+                            $pitcher->last_name = substr($pfx->pitcher_name, 0, strpos($pfx->pitcher_name, ','));
+                            $pitcher->save();
+                            $this->info('Added Player '.$pfx->pitcher_name);
+                        }
+                        $pitch_type = PitchType::where('pfx_code', $pfx->pitch_name)->first();
+                        if (!$pitch_type){
+                            $pitch_type = new PitchType;
+                            $pitch_type->pfx_code = $pfx->pitch_name;
+                            $pitch_type->save();
+                            $this->info('Added PitchType '.$pfx->pitch_name);
+                        }
+                        $batted_ball_type = BattedBallType::where('pfx_code', $pfx->event_result)->first();
+                        DB::beginTransaction();
+                        $pitch = new Pitch;
+                        $pitch->game_id = $game->id;
+                        $pitch->batter_id = $batter->id;
+                        $pitch->pitcher_id = $pitcher->id;
+                        $pitch->inning = $pfx->inning;
+                        $pitch->velocity = $pfx->initial_speed;
+                        $pitch->ballspre = $pfx->ballspre;
+                        $pitch->strikespre = $pfx->strikespre;
+                        $pitch->strikespre = $pfx->strikespre;
+                        $pitch->pitch_type_id = $pitch_type->id;
+                        // $pitch->batted_ball_type_id = $
+                        DB::commit();
+                    }
+                    foreach($auto_columns as $col){
+                        if ($pfx->{$col['pfx']} != $stat->{$col['stats']}){
+                            $d = new Discrepancy;
+                            $d->type = 'bad_data';
+                            // $d->
+                        }
+                    }
                 }
                 var_dump($stat);
                 
