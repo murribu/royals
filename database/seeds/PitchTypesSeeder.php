@@ -187,6 +187,7 @@ class PitchTypesSeeder extends Seeder{
                     ),
                     'stats' => array(
                         'NA',
+                        'U',
                         ''
                     ),
                 ),
