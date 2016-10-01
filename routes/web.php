@@ -12,5 +12,12 @@
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('dashboard');
+});
+
+Route::group(['prefix' => 'api'], function(){
+    Route::get('years', 'ApiController@getYears');
+    Route::get('months/{year}', 'ApiController@getMonths');
+    Route::get('days/{year}/{month}', 'ApiController@getDays');
+    Route::get('games/{year}/{month}/{day}', 'ApiController@getGames');
 });

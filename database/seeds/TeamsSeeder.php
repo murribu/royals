@@ -20,7 +20,7 @@ class TeamsSeeder extends Seeder{
                 'pfx_abbr' => 'anamlb',
                 'league' => 'AL',
                 'location' => 'Los Angeles',
-                'name' => 'Angels of Anaheim',
+                'name' => 'Angels',
             ),
             array(
                 'stats_abbr' => 'ari',

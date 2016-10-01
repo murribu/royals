@@ -114,7 +114,6 @@ class CompareSources extends Command
             foreach($pfx_pitches as $pfx){
                 //try to find the corresponding stats record
                 
-                DB::enableQueryLog();
                 $stat = StatsPitch::where('date', substr($game_id,0,4).'-'.substr($game_id,5,2).'-'.substr($game_id,8,2))
                     ->where('batter_id', $pfx->batter->mlb_id)
                     ->where('pitcher_id', $pfx->pitcher->mlb_id)
@@ -165,7 +164,7 @@ class CompareSources extends Command
                                 $away_team->save();
                                 $this->info('Added Team '.substr($pfx->game_id, 11, 6));
                             }
-                            $home_team = Team::where('pfx_abbr', substr($pfx->game_id, 19, 6))->first();
+                            $home_team = Team::where('pfx_abbr', substr($pfx->game_id, 18, 6))->first();
                             if (!$home_team){
                                 $home_team = new Team;
                                 $home_team->pfx_abbr = substr($pfx->game_id, 18, 6);
