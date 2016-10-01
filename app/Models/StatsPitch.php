@@ -19,6 +19,26 @@ class StatsPitch extends Model {
         foreach($headers as $key=>$h){
             $line[$h] = $line[$key];
         }
+        $prev = StatsPitch::where('line_number', $line['line_number'] - 1)->first();
+        $pa_number = 1;
+        $pa_sequence = 1;
+        $game_id = 990000;
+        if ($prev && $prev->inning > 8 && $line['inning'] == '1'){
+            //new game
+            $pa_number = 1;
+            $pa_sequence = 1;
+            $game_id = $prev->game_id + 1;
+        }else if ($prev && ($prev->batter_id != $line['batter_id'] || $prev->inning != $line['inning'])){
+            //new pa
+            $pa_number = $prev->pa_number + 1;
+            $pa_sequence = 1;
+            $game_id = $prev->game_id;
+        }else if ($prev){
+            //continuing the pa
+            $pa_number = $prev->pa_number;
+            $pa_sequence = $prev->pa_sequence + 1;
+            $game_id = $prev->game_id;
+        }
         if ($p){
             return ['success' => 0, 'message' => 'This StatsPitch already exists'];
         }else{
@@ -53,6 +73,9 @@ class StatsPitch extends Model {
             $p->date = $line['year'].'-'.$line['month'].'-'.$line['day'];
             $p->home_team_id = $home_team->id;
             $p->away_team_id = $away_team->id;
+            $p->pa_number = $pa_number;
+            $p->pa_sequence = $pa_sequence;
+            $p->game_id = $game_id;
             $p->save();
             
             return ['success' => 1, 'message' => 'Record created'];

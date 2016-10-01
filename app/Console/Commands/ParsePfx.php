@@ -56,8 +56,9 @@ class ParsePfx extends Command
         $headers = $csv->fetchOne();
 
         $max_line_number = PfxPitch::max('line_number');
-        $max_line_number = $max_line_number ? $max_line_number + 1 : 1;
+        $max_line_number = $max_line_number ? $max_line_number : 0;
         
+        $max_line_number++;
         $set = $csv->setOffset($max_line_number)->setLimit(1000)->fetchAll();
         
         foreach($set as $num => $line){

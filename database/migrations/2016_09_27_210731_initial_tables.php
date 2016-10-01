@@ -130,6 +130,9 @@ class InitialTables extends Migration
             $table->string('pitch_name')->nullable();
             $table->string('game_id')->nullable()->index();
             $table->string('event_type')->nullable();
+            $table->integer('pa_number');
+            $table->integer('pa_sequence');
+            $table->unique(['game_id', 'pa_number', 'pa_sequence']);
             $table->timestamps();
         });
         Schema::create('stats_pitches', function (Blueprint $table) {
@@ -158,6 +161,10 @@ class InitialTables extends Migration
             $table->foreign('home_team_id')->references('id')->on('teams');
             $table->integer('away_team_id')->nullable()->unsigned();
             $table->foreign('away_team_id')->references('id')->on('teams');
+            $table->integer('game_id')->index();
+            $table->integer('pa_number');
+            $table->integer('pa_sequence');
+            $table->unique(['game_id', 'pa_number', 'pa_sequence']);
             $table->timestamps();
         });
         Schema::create('pitch_result_types', function (Blueprint $table) {

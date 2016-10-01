@@ -18,6 +18,22 @@ class PfxPitch extends Model {
         foreach($headers as $key=>$h){
             $line[$h] = $line[$key];
         }
+        $prev = PfxPitch::where('line_number', $line['line_number'] - 1)->first();
+        $pa_number = 1;
+        $pa_sequence = 1;
+        if ($prev && $prev->inning > 8 && $line['inning'] == '1'){
+            //new game
+            $pa_number = 1;
+            $pa_sequence = 1;
+        }else if ($prev && ($prev->batter_id != $line['batter_id'] || $prev->inning != $line['inning'])){
+            //new pa
+            $pa_number = $prev->pa_number + 1;
+            $pa_sequence = 1;
+        }else if ($prev){
+            //continuing the pa
+            $pa_number = $prev->pa_number;
+            $pa_sequence = $prev->pa_sequence + 1;
+        }
         if ($p){
             return ['success' => 0, 'message' => 'This PfxPitch already exists'];
         }else{
@@ -42,6 +58,8 @@ class PfxPitch extends Model {
             $p->pitch_name = $line['pitch_name'];
             $p->game_id = $line['game_id'];
             $p->event_type = $line['event_type'];
+            $p->pa_number = $pa_number;
+            $p->pa_sequence = $pa_sequence;
             $p->save();
             
             return ['success' => 1, 'message' => 'Record created'];
