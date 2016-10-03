@@ -34,9 +34,36 @@ class ApiController extends Controller
     }
     
     public function getGames($year, $month, $day){
-        $games = Game::with('home_team', 'away_team')
+        $games = Game::leftJoin('teams as home_team', 'home_team.id', '=', 'games.home_team_id')
+            ->leftJoin('teams as away_team', 'away_team.id', '=', 'games.away_team_id')
             ->whereBetween('date', [$year.'-'.$month.'-'.$day, $year.'-'.$month.'-'.$day])
+            ->select('home_team.name as home_team', 'away_team.name as away_team', 'games.id as game_id')
             ->get();
         return $games;
+    }
+    
+    public function getGame($game_id){
+        $game = Game::leftJoin('teams as home_team', 'home_team.id', '=', 'games.home_team_id')
+            ->leftJoin('teams as away_team', 'away_team.id', '=', 'games.away_team_id')
+            ->select('home_team.name as home_team', 'away_team.name as away_team', 'games.id as game_id', 'games.id')
+            ->find($game_id);
+        $game->innings = $game->innings();
+        return $game;
+    }
+    
+    public function getInning($game_id, $inning){
+        return Pitch::where('game_id', $game_id)
+            ->where('inning', $inning)
+            ->leftJoin('players as batter', 'batter.id', '=', 'pitches.batter_id')
+            ->leftJoin('players as pitcher', 'pitcher.id', '=', 'pitches.pitcher_id')
+            ->selectRaw("batter.last_name as batter, pitcher.last_name pitcher, count(pitches.id) as pitch_count, pa_number")
+            ->groupBy('pa_number', 'batter.first_name', 'batter.last_name', 'pitcher.first_name', 'pitcher.last_name', 'pa_number')
+            ->get();
+    }
+    
+    public function getPlateAppearance($game_id, $pa){
+        return Pitch::where('game_id', $game_id)
+            ->where('pa_number', $pa)
+            ->get();
     }
 }

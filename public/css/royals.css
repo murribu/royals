@@ -1,4 +1,4 @@
-.game{
+.game-button{
     width: 130px;
     border: 1px solid black;
     margin: 8px;
@@ -7,6 +7,6 @@
     background-color: #fff;
     cursor: pointer;
 }
-.game.active{
+.game-button.active{
     background-color: #ddd;
 }

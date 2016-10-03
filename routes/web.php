@@ -20,4 +20,8 @@ Route::group(['prefix' => 'api'], function(){
     Route::get('months/{year}', 'ApiController@getMonths');
     Route::get('days/{year}/{month}', 'ApiController@getDays');
     Route::get('games/{year}/{month}/{day}', 'ApiController@getGames');
+    Route::get('game/{game_id}', 'ApiController@getGame');
+    Route::get('game/{game_id}/inning/{inning}', 'ApiController@getInning');
+    Route::get('game/{game_id}/pa/{pa}', 'ApiController@getPlateAppearance');
+    
 });

@@ -225,6 +225,8 @@ class CompareSources extends Command
                         $pitch->pitch_type_id = $pitch_type->id;
                         $pitch->event_code_id = $event_code->id;
                         $pitch->pitch_result_type_id = $pitch_result_type->id;
+                        $pitch->pa_number = $pfx->pa_number;
+                        $pitch->pa_sequence = $pfx->pa_sequence;
                         $pitch->save();
                         
                         $pitch_ds = new PitchDataSource;
