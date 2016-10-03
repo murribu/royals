@@ -70,7 +70,7 @@ class CompareSources extends Command
                     'discrepancy_data_sources',
                     'discrepancies',
                     'pitches',
-                    
+                    'games',
                 );
                 foreach($tables as $table){
                     DB::statement("DELETE FROM ".$table);
@@ -176,6 +176,7 @@ class CompareSources extends Command
                             $game->home_team_id = $home_team->id;
                             $game->away_team_id = $away_team->id;
                             $game->date = substr($pfx->game_id, 0, 4)."-".substr($pfx->game_id, 5, 2)."-".substr($pfx->game_id, 8, 2);
+                            $game->stats_game_id = $stat->game_id;
                             $game->save();
                         }
                         $batter = Player::where('mlb_id', $pfx->batter_id)->first();
@@ -233,6 +234,12 @@ class CompareSources extends Command
                         $pitch_ds->pitch_id = $pitch->id;
                         $pitch_ds->data_source_id = $source_pfx->id;
                         $pitch_ds->data_source_table_id = $pfx->id;
+                        $pitch_ds->save();
+                        
+                        $pitch_ds = new PitchDataSource;
+                        $pitch_ds->pitch_id = $pitch->id;
+                        $pitch_ds->data_source_id = $source_stats->id;
+                        $pitch_ds->data_source_table_id = $stat->id;
                         $pitch_ds->save();
                         DB::commit();
                         

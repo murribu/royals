@@ -9,6 +9,8 @@ use App\Http\Requests;
 
 use App\Models\Game;
 use App\Models\Pitch;
+use App\Models\PfxPitch;
+use App\Models\StatsPitch;
 
 class ApiController extends Controller
 {
@@ -56,14 +58,38 @@ class ApiController extends Controller
             ->where('inning', $inning)
             ->leftJoin('players as batter', 'batter.id', '=', 'pitches.batter_id')
             ->leftJoin('players as pitcher', 'pitcher.id', '=', 'pitches.pitcher_id')
-            ->selectRaw("batter.last_name as batter, pitcher.last_name pitcher, count(pitches.id) as pitch_count, pa_number")
+            ->leftJoin('discrepancies', 'discrepancies.pitch_id', '=', 'pitches.id')
+            ->selectRaw("batter.last_name as batter, pitcher.last_name pitcher, count(pitches.id) as pitch_count, pa_number, count(discrepancies.id) discrepancies")
             ->groupBy('pa_number', 'batter.first_name', 'batter.last_name', 'pitcher.first_name', 'pitcher.last_name', 'pa_number')
             ->get();
     }
     
     public function getPlateAppearance($game_id, $pa){
-        return Pitch::where('game_id', $game_id)
+        $pitches = Pitch::where('game_id', $game_id)
             ->where('pa_number', $pa)
             ->get();
+            
+        foreach($pitches as $pitch){
+            $pitch->pitch_type_name = $pitch->pitch_type->name;
+        }
+        
+        $pfx = PfxPitch::where('game_id', function($query) use ($game_id){
+            $query->select('pfx_id')
+                ->from('games')
+                ->where('id', $game_id);
+        })
+        ->where('pa_number', $pa)
+        ->get();
+        
+        $stats = StatsPitch::with('pitch_type')
+            ->where('game_id', function($query) use ($game_id){
+                $query->select('stats_game_id')
+                    ->from('games')
+                    ->where('id', $game_id);
+        })
+        ->where('pa_number', $pa)
+        ->get();
+        
+        return compact('pitches', 'pfx', 'stats');
     }
 }

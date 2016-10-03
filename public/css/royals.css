@@ -10,3 +10,34 @@
 .game-button.active{
     background-color: #ddd;
 }
+.has-info-badge:before{
+    content:attr(data-info-badge);
+    position: absolute;
+    background: green;
+    height: 20px;
+    top: -6px;
+    right: 1px;
+    width: 20px;
+    text-align: center;
+    line-height: 2rem;
+    font-size: 8px;
+    border-radius: 50%;
+    color: white;
+    border: 1px solid gray;
+    z-index: 2;
+}
+.has-bad-badge:after{
+    content:attr(data-bad-badge);
+    position: absolute;
+    background: red;
+    height: 20px;
+    top: -6px;
+    right: 25px;
+    width: 20px;
+    text-align: center;
+    line-height: 2rem;
+    font-size: 8px;
+    border-radius: 50%;
+    color: white;
+    border: 1px solid red;
+}

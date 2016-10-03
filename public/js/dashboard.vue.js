@@ -17,7 +17,9 @@ Vue.component('dashboard',{
                 },
                 plate_appearance:{
                     pa_number: 0,
-                    pitches:[]
+                    pitches:[],
+                    pfx_pitches:[],
+                    stats_pitches:[],
                 }
             },
             years: [],
@@ -34,6 +36,9 @@ Vue.component('dashboard',{
         gameIsSelected: function(){
             return typeof(this.selected.game.game_id) != 'undefined';
         },
+        paIsSelected: function(){
+            return typeof(this.selected.plate_appearance.pitches[0]) != 'undefined';   
+        }
     },
     methods: {
         ordinal: function(num){
@@ -119,6 +124,7 @@ Vue.component('dashboard',{
             this.loadInning(this.selected.game.game_id, i);
         },
         loadInning: function(g, i){
+            this.unselectPlateAppearance;
             var vm = this;
             vm.selected.inning.plate_appearances = [];
             this.$http.get('/api/game/' + g + '/inning/' + i).then(function(data){
@@ -135,10 +141,21 @@ Vue.component('dashboard',{
             var vm = this;
             vm.selected.plate_appearance.pitches = [];
             this.$http.get('/api/game/' + g + '/pa/' + pa).then(function(data){
-                vm.selected.plate_appearance.pitches = JSON.parse(data.body);
+                var ret = JSON.parse(data.body);
+                vm.selected.plate_appearance.pitches = ret.pitches;
+                vm.selected.plate_appearance.pfx_pitches = ret.pfx;
+                vm.selected.plate_appearance.stats_pitches = ret.stats;
             },function(d){
                 alert('error');
             });
+        },
+        unselectPlateAppearance: function(){
+            this.selected.plate_appearance = {
+                    pa_number: 0,
+                    pitches:[],
+                    pfx_pitches:[],
+                    stats_pitches:[],
+                };
         }
     }
 });

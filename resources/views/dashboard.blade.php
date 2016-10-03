@@ -39,8 +39,84 @@
             <li v-for="i in selected.game.innings" :class="{'active': i == selected.inning.inning}"><a href="#" @click="selectInning(i)" :class="{'active': i == selected.inning.inning}">@{{ordinal(i)}}</a></li>
         </ul>
         <ul class="nav nav-tabs">
-            <li v-for="pa in selected.inning.plate_appearances" :data-pitch-count="pa.pitch_count" :class="{'active': selected.plate_appearance.pa_number == pa.pa_number}"><a href="#" @click="selectPlateAppearance(pa.pa_number)">@{{pa.batter}} v @{{pa.pitcher}}</a></li>
+            <li v-for="pa in selected.inning.plate_appearances" 
+                style="text-align:center"
+                :data-info-badge="pa.pitch_count" 
+                :data-bad-badge="pa.discrepancies" 
+                :title="pa.discrepancies + ' discrepancies' + pa.pitch_count + ' pitches, '"
+                :class="{
+                        'active': selected.plate_appearance.pa_number == pa.pa_number, 
+                        'has-info-badge': pa.pitch_count > 0, 
+                        'has-bad-badge': pa.discrepancies > 0
+                        }"><a href="#" @click="selectPlateAppearance(pa.pa_number)">@{{pa.batter}}<br>@{{pa.pitcher}}</a></li>
         </ul>
+        <div class="plate-appearance" v-show="paIsSelected">
+            <table class="table">
+                <thead>
+                    <tr style="text-align:center">
+                        <th>Truth</th>
+                        <th>Pfx</th>
+                        <th>Stats</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <table class="table table-striped table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>SeqNum</th>
+                                        <th>Pitch</th>
+                                        <th>Velo</th>
+                                    </tr>
+                                    <tr v-for="pitch in selected.plate_appearance.pitches">
+                                        <td>@{{pitch.pa_sequence}}</td>
+                                        <td>@{{pitch.pitch_type_name}}</td>
+                                        <td>@{{pitch.velocity}}</td>
+                                    </tr>
+                                </thead>
+                            </table>
+                        </td>
+                        <td>
+                            <table class="table table-striped table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>SeqNum</th>
+                                        <th>Pitch</th>
+                                        <th>Velo</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="pitch in selected.plate_appearance.pfx_pitches">
+                                        <td>@{{pitch.pa_sequence}}</td>
+                                        <td>@{{pitch.pitch_name}}</td>
+                                        <td>@{{pitch.initial_speed}}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </td>
+                        <td>
+                            <table class="table table-striped table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>SeqNum</th>
+                                        <th>Pitch</th>
+                                        <th>Velo</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="pitch in selected.plate_appearance.stats_pitches">
+                                        <td>@{{pitch.pa_sequence}}</td>
+                                        <td>@{{pitch.pitch_type.name}}</td>
+                                        <td>@{{pitch.stats_velocity}}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 </template>
 @endsection
