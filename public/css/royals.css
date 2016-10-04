@@ -1,11 +1,14 @@
 .game-button{
     width: 130px;
+    height: 52px;
     border: 1px solid black;
     margin: 8px;
     padding: 4px;
     border-radius: 7px;
     background-color: #fff;
     cursor: pointer;
+    float: left;
+    text-align: center;
 }
 .game-button.active{
     background-color: #ddd;

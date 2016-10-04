@@ -39,12 +39,16 @@ class ApiController extends Controller
     }
     
     public function getGames($year, $month, $day){
-        $games = Game::leftJoin('teams as home_team', 'home_team.id', '=', 'games.home_team_id')
-            ->leftJoin('teams as away_team', 'away_team.id', '=', 'games.away_team_id')
-            ->whereBetween('date', [$year.'-'.$month.'-'.$day, $year.'-'.$month.'-'.$day])
-            ->select('home_team.name as home_team', 'away_team.name as away_team', 'games.id as game_id')
-            ->get();
-        return $games;
+        $query = "select home_team.name as home_team, away_team.name as away_team, games.id as game_id, count(discrepancies.id) discrepancies
+        from games
+        left join teams as home_team on home_team.id = games.home_team_id
+        left join teams as away_team on away_team.id = games.away_team_id
+        left join pitches on pitches.game_id = games.id
+        left join `discrepancies` on `discrepancies`.`pitch_id` = `pitches`.`id` and `discrepancies`.`resolved` is null
+        where date between ? and ?
+        group by home_team.name, away_team.name, games.id";
+        $ret = DB::select($query, [$year.'-'.$month.'-'.$day, $year.'-'.$month.'-'.$day]);
+        return $ret;
     }
     
     public function getGame($game_id){
@@ -80,24 +84,22 @@ class ApiController extends Controller
             $pitch->pitch_type_name = $pitch->pitch_type->name;
         }
         
-        $pfx_query = "select pfx_pitches.id, pfx_pitches.pa_sequence, pfx_pitches.initial_speed, pfx_pitches.pitch_name, discrepancies.pitch_id, pfx_pitches.event_result event_type, group_concat(distinct discrepancies.column_name) discrepancies_str
+        $pfx_query = "select pfx_pitches.id, pfx_pitches.pa_sequence, pfx_pitches.initial_speed, pfx_pitches.pitch_name, max(discrepancies.pitch_id) pitch_id, pfx_pitches.event_result event_type, group_concat(distinct discrepancies.column_name) discrepancies_str
             from `pfx_pitches` 
             left join `discrepancy_data_sources` on `discrepancy_data_sources`.`data_source_table_id` = `pfx_pitches`.`id` and `discrepancy_data_sources`.`data_source_id` = 2 
             left join `discrepancies` on `discrepancies`.`id` = `discrepancy_data_sources`.`discrepancy_id` and `discrepancies`.`resolved` is null 
             where `game_id` = (select `pfx_id` from `games` where `id` = ?) and `pa_number` = ? 
-            group by `pfx_pitches`.`id`, `pfx_pitches`.`pa_sequence`, `pfx_pitches`.`initial_speed`, `pfx_pitches`.`pitch_name`, `discrepancies`.`pitch_id`, pfx_pitches.event_result";
+            group by `pfx_pitches`.`id`, `pfx_pitches`.`pa_sequence`, `pfx_pitches`.`initial_speed`, `pfx_pitches`.`pitch_name`, pfx_pitches.event_result";
 
         $pfx = DB::select($pfx_query, [$game_id, $pa]);
         
-        $stats_query = "select stats_pitches.id, stats_pitches.pa_sequence, stats_pitches.stats_velocity, pitch_types.name pitch_name, discrepancies.pitch_id, event_codes.name event_type, group_concat(distinct discrepancies.column_name) discrepancies_str 
+        $stats_query = "select stats_pitches.id, stats_pitches.pa_sequence, stats_pitches.stats_velocity, pitch_types.name pitch_name, max(discrepancies.pitch_id) pitch_id, event_codes.name event_type, group_concat(distinct discrepancies.column_name) discrepancies_str 
             from `stats_pitches` left join `discrepancy_data_sources` on `discrepancy_data_sources`.`data_source_table_id` = `stats_pitches`.`id` and `discrepancy_data_sources`.`data_source_id` = 1 
             left join `discrepancies` on `discrepancies`.`id` = `discrepancy_data_sources`.`discrepancy_id` and `discrepancies`.`resolved` is null 
             left join `pitch_types` on `pitch_types`.`id` = `stats_pitches`.`stats_pitch_type_id` 
-            left join data_source_event_codes on data_source_event_codes.code = stats_pitches.stats_event_code_id
-            left join (select min(event_code_id) event_code, data_source_event_code_id from data_source_event_code_matches group by data_source_event_code_id) dsecm on dsecm.data_source_event_code_id = data_source_event_codes.id
-            left join event_codes on dsecm.event_code = event_codes.id
+            left join event_codes on stats_pitches.stats_event_code_id = event_codes.id
             where `game_id` = (select `stats_game_id` from `games` where `id` = ?) and `pa_number` = ? 
-            group by `stats_pitches`.`id`, `stats_pitches`.`pa_sequence`, `stats_pitches`.`stats_velocity`, `pitch_types`.`name`, `discrepancies`.`pitch_id`, event_codes.name";
+            group by `stats_pitches`.`id`, `stats_pitches`.`pa_sequence`, `stats_pitches`.`stats_velocity`, `pitch_types`.`name`, event_codes.name";
         
         $stats = DB::select($stats_query, [$game_id, $pa]);
 

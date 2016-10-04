@@ -1,5 +1,5 @@
 <?php namespace App\Models;
-
+use DB;
 use Illuminate\Database\Eloquent\Model;
 
 class Game extends Model {
@@ -14,11 +14,14 @@ class Game extends Model {
     }
     
     public function innings(){
-        return Pitch::where('game_id', $this->id)
-            ->select('inning')
-            ->distinct()
-            ->get()
-            ->pluck('inning');
+        $query = "select inning, count(discrepancies.id) discrepancies
+        from pitches 
+        left join discrepancies on discrepancies.pitch_id = pitches.id and discrepancies.resolved is null
+        where game_id = ?
+        group by inning
+        ";
+        $ret = DB::select($query, [$this->id]);
+        return $ret;
     }
     
     public function pitches(){

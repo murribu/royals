@@ -26,7 +26,7 @@
         </ul>
         <div class="games-container" v-show="games">
             <div class="game-button" v-for="game in games" :class="{'active': game.id == selected.game}" @click="selectGame(game)">
-                @{{game.away_team}} @ @{{game.home_team}}
+                @{{game.away_team}} <br>@ @{{game.home_team}}
             </div>
         </div>
     </div>
@@ -36,7 +36,9 @@
         </div>
         <h3>@{{selected.game.away_team + ' @ ' + selected.game.home_team + ' - ' + monthnames[selected.month] + ' ' + selected.day + ', ' + selected.year}}</h3>
         <ul class="nav nav-tabs">
-            <li v-for="i in selected.game.innings" :class="{'active': i == selected.inning.inning}"><a href="#" @click="selectInning(i)" :class="{'active': i == selected.inning.inning}">@{{ordinal(i)}}</a></li>
+            <li v-for="i in selected.game.innings" 
+                :class="{'active': i.inning == selected.inning.inning, 'has-bad-badge': i.discrepancies > 0}"
+                :data-bad-badge="i.discrepancies"><a href="#" @click="selectInning(i.inning)" :class="{'active': i.inning == selected.inning.inning}">@{{ordinal(i.inning)}}</a></li>
         </ul>
         <ul class="nav nav-tabs">
             <li v-for="pa in selected.inning.plate_appearances" 

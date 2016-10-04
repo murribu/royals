@@ -130,11 +130,11 @@ Vue.component('dashboard',{
             });
         },
         selectInning: function(i){
+            this.unselectPlateAppearance();
             this.selected.inning.inning = i;
             this.loadInning(this.selected.game.game_id, i);
         },
         loadInning: function(g, i){
-            this.unselectPlateAppearance;
             var vm = this;
             this.$http.get('/api/game/' + g + '/inning/' + i).then(function(data){
                 vm.selected.inning.plate_appearances = JSON.parse(data.body);
@@ -175,7 +175,9 @@ Vue.component('dashboard',{
             });
         },
         selectDiscrepancy: function(pitch, column_name){
-            this.loadDiscrepancy(pitch.pitch_id, column_name);
+            if (pitch.discrepancies[column_name]){
+                this.loadDiscrepancy(pitch.pitch_id, column_name);
+            }
         },
         loadDiscrepancy: function(pitch_id, column_name){
             this.unselectDiscrepancy();
@@ -212,6 +214,7 @@ Vue.component('dashboard',{
             this.$http.post('/api/discrepancy/' + pitch_id + '/' + column_name + '/resolve', sent).then(function(data){
                 this.loadInning(this.selected.game.game_id, this.selected.inning.inning);
                 this.loadPlateAppearance(this.selected.game.game_id, this.selected.plate_appearance.pa_number);
+                this.loadGame(this.selected.game.game_id);
             },function(d){
                 alert('error');
             });
