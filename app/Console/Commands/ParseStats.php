@@ -62,7 +62,11 @@ class ParseStats extends Command
         
         foreach($set as $num => $line){
             $line['line_number'] = $num + $max_line_number;
-            $result = StatsPitch::create_from_line($line, $headers);
+            $next = $csv->setOffset($line['line_number'] + 1)->setLimit(1)->fetchAll();
+            if ($next){
+                $next = $next[0];
+            }
+            $result = StatsPitch::create_from_line($line, $headers, $next);
         }
     }
 }

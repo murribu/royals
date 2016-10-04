@@ -38,4 +38,14 @@ class Pitch extends Model {
     public function pitch_type(){
         return $this->belongsTo('App\Models\PitchType');
     }
+    
+    public function event_code(){
+        $dsec = DataSourceEventCode::whereRaw('id in (select data_source_event_code_id from data_source_event_code_matches where event_code_id = ?)', [$this->event_code_id])
+            ->where('data_source_id', DB::raw('2'))
+            ->first();
+            
+        if ($dsec){
+            return $dsec->code;
+        }
+    }
 }

@@ -13,11 +13,14 @@ class StatsPitch extends Model {
         return $this->belongsTo('App\Models\PitchType', 'stats_pitch_type_id');
     }
     
-    public static function create_from_line($line, $headers){
+    public static function create_from_line($line, $headers, $next){
         $p = self::where('line_number', $line['line_number'])->first();
         $source_stats = DataSource::where('name', 'Stats')->first();
         foreach($headers as $key=>$h){
             $line[$h] = $line[$key];
+        }
+        foreach($headers as $key=>$h){
+            $next[$h] = $next[$key];
         }
         $prev = StatsPitch::where('line_number', $line['line_number'] - 1)->first();
         $pa_number = 1;
@@ -69,7 +72,10 @@ class StatsPitch extends Model {
             }
             $p->stats_pitch_type_id = $pitch_type->id;
             $p->stats_batted_ball_type_id = $batted_ball_type->id;
-            $p->stats_event_code_id = $event_code->id;
+            if ($next && ($next['inning'] != $line['inning'] || $next['batter_id'] != $line['batter_id'])){
+                //last pitch of pa
+                $p->stats_event_code_id = $event_code->id;
+            }
             $p->date = $line['year'].'-'.$line['month'].'-'.$line['day'];
             $p->home_team_id = $home_team->id;
             $p->away_team_id = $away_team->id;

@@ -43,7 +43,7 @@
                 style="text-align:center"
                 :data-info-badge="pa.pitch_count" 
                 :data-bad-badge="pa.discrepancies" 
-                :title="pa.discrepancies + ' discrepancies' + pa.pitch_count + ' pitches, '"
+                :title="pa.discrepancies + ' discrepancies, ' + pa.pitch_count + ' pitches'"
                 :class="{
                         'active': selected.plate_appearance.pa_number == pa.pa_number, 
                         'has-info-badge': pa.pitch_count > 0, 
@@ -53,10 +53,10 @@
         <div class="plate-appearance" v-show="paIsSelected">
             <table class="table">
                 <thead>
-                    <tr style="text-align:center">
-                        <th>Truth</th>
-                        <th>Pfx</th>
-                        <th>Stats</th>
+                    <tr>
+                        <th><h3>Truth</h3></th>
+                        <th><h3>Pfx</h3></th>
+                        <th><h3>Stats</h3></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -68,11 +68,13 @@
                                         <th>SeqNum</th>
                                         <th>Pitch</th>
                                         <th>Velo</th>
+                                        <th>Event</th>
                                     </tr>
                                     <tr v-for="pitch in selected.plate_appearance.pitches">
                                         <td>@{{pitch.pa_sequence}}</td>
                                         <td>@{{pitch.pitch_type_name}}</td>
                                         <td>@{{pitch.velocity}}</td>
+                                        <td>@{{pitch.event_type}}</td>
                                     </tr>
                                 </thead>
                             </table>
@@ -84,13 +86,17 @@
                                         <th>SeqNum</th>
                                         <th>Pitch</th>
                                         <th>Velo</th>
+                                        <th>Event</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr v-for="pitch in selected.plate_appearance.pfx_pitches">
                                         <td>@{{pitch.pa_sequence}}</td>
-                                        <td>@{{pitch.pitch_name}}</td>
+                                        <td :class="{'discrepancy' : pitch.discrepancies.pitch_type}"
+                                            @click="selectDiscrepancy(pitch, 'pitch_type')">@{{pitch.pitch_name}}</td>
                                         <td>@{{pitch.initial_speed}}</td>
+                                        <td :class="{'discrepancy' : pitch.discrepancies.event_code}"
+                                            @click="selectDiscrepancy(pitch, 'event_code')">@{{pitch.event_type}}</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -102,13 +108,17 @@
                                         <th>SeqNum</th>
                                         <th>Pitch</th>
                                         <th>Velo</th>
+                                        <th>Event</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr v-for="pitch in selected.plate_appearance.stats_pitches">
                                         <td>@{{pitch.pa_sequence}}</td>
-                                        <td>@{{pitch.pitch_type.name}}</td>
+                                        <td :class="{'discrepancy' : pitch.discrepancies.pitch_type}"
+                                            @click="selectDiscrepancy(pitch, 'pitch_type')">@{{pitch.pitch_name}}</td>
                                         <td>@{{pitch.stats_velocity}}</td>
+                                        <td :class="{'discrepancy' : pitch.discrepancies.event_code}"
+                                            @click="selectDiscrepancy(pitch, 'event_code')">@{{pitch.event_type}}</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -116,6 +126,52 @@
                     </tr>
                 </tbody>
             </table>
+            <div class="discrepancy" v-show="discrepancyIsSelected">
+                <div class="row">
+                    <div class="col-xs-4">
+                        <h3>Truth</h3>
+                    </div>
+                    <div class="col-xs-4">
+                        <h3>Pfx</h3>
+                    </div>
+                    <div class="col-xs-4">
+                        <h3>Stats</h3>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-4">
+                        <input class="form-control" :value="selected.discrepancy.truth" readonly />
+                    </div>
+                    <div class="col-xs-4">
+                        <input class="form-control" :value="selected.discrepancy.pfx" readonly />
+                    </div>
+                    <div class="col-xs-4">
+                        <input class="form-control" :value="selected.discrepancy.stats" readonly />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-4">
+                        <button class="btn btn-primary" @click="resolveDiscrepancy()">Mark as Resolved</button>
+                    </div>
+                    <div class="col-xs-4">
+                        <button class="btn btn-primary" 
+                                v-show="selected.discrepancy.truth != selected.discrepancy.pfx"
+                                @click="chooseSource('pfx')">Choose</button>
+                        <button class="btn btn-default" disabled v-show="selected.discrepancy.truth == selected.discrepancy.pfx">Chosen</button>
+                    </div>
+                    <div class="col-xs-4">
+                        <button class="btn btn-primary" 
+                                v-show="selected.discrepancy.truth != selected.discrepancy.stats"
+                                @click="chooseSource('stats')">Choose</button>
+                        <button class="btn" disabled v-show="selected.discrepancy.truth == selected.discrepancy.stats">Chosen</button>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-12">
+                        <h4>Refer to <a :href="selected.game.bbref_url" target="_new">Baseball-Reference.com</a> for more info.</h4>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </template>

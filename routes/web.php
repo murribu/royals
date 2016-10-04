@@ -23,5 +23,8 @@ Route::group(['prefix' => 'api'], function(){
     Route::get('game/{game_id}', 'ApiController@getGame');
     Route::get('game/{game_id}/inning/{inning}', 'ApiController@getInning');
     Route::get('game/{game_id}/pa/{pa}', 'ApiController@getPlateAppearance');
+    Route::get('discrepancy/{pitch_id}/{column_name}', 'ApiController@getDiscrepancy');
+    Route::post('discrepancy/{pitch_id}/{column_name}', 'ApiController@postDiscrepancy');
+    Route::post('discrepancy/{pitch_id}/{column_name}/resolve', 'ApiController@postResolveDiscrepancy');
     
 });

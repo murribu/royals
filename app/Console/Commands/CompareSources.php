@@ -211,7 +211,7 @@ class CompareSources extends Command
                             dd("Event Code not found ".$pfx->event_result);
                         }
                         $event_code = $data_source_event_code->event_code();
-                        $pitch_result_type = PitchResultType::where('code', $pfx->event_type)->first();
+                        $pitch_result_type = PitchResultType::where('code', $pfx->event_type)->orderBy('id', 'desc')->first();
                         
                         DB::beginTransaction();
                         $pitch = new Pitch;

@@ -16,8 +16,12 @@ class DataSourceEventCode extends Model {
     }
     
     public function does_match($event_code, $source){
-        $code_ids = DataSourceEventCodeMatch::where('data_source_event_code_id', $this->id)->pluck('event_code_id')->toArray();
-        
-        return in_array($event_code->id, $code_ids);
+        if ($event_code){
+            $code_ids = DataSourceEventCodeMatch::where('data_source_event_code_id', $this->id)->pluck('event_code_id')->toArray();
+            
+            return in_array($event_code->id, $code_ids);
+        }else{
+            return false;
+        }
     }
 }

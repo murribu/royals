@@ -41,3 +41,8 @@
     color: white;
     border: 1px solid red;
 }
+td.discrepancy{
+    background-color: red;
+    color:white;
+    cursor:pointer;
+}
