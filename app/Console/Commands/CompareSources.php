@@ -148,6 +148,7 @@ class CompareSources extends Command
                     $dds->save();
                     DB::commit();
                 }else{
+                    $data_source_pitch_type = false;
                     $pitch = Pitch::where('id', function($query) use ($source_pfx, $pfx){
                         $query->select('pitch_id')
                             ->from('pitch_data_sources')
