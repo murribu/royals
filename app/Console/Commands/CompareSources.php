@@ -204,15 +204,19 @@ class CompareSources extends Command
                             ->first();
                         if (!$data_source_pitch_type){
                             $this->info("Pitch Type not found ".$pfx->pitch_name);
+                            $pitch_type = false;
+                        }else{
+                            $pitch_type = $data_source_pitch_type->pitch_type();
                         }
-                        $pitch_type = $data_source_pitch_type->pitch_type();
                         $data_source_event_code = DataSourceEventCode::where('data_source_id', $source_pfx->id)
                             ->where('code', $pfx->event_result)
                             ->first();
                         if (!$data_source_event_code){
                             $this->info("Event Code not found ".$pfx->event_result);
+                            $event_code = false;
+                        }else{
+                            $event_code = $data_source_event_code->event_code();
                         }
-                        $event_code = $data_source_event_code->event_code();
                         $pitch_result_type = PitchResultType::where('code', $pfx->event_type)->orderBy('id', 'desc')->first();
                         
                         DB::beginTransaction();
@@ -225,9 +229,15 @@ class CompareSources extends Command
                         $pitch->ballspre = $pfx->ballspre;
                         $pitch->strikespre = $pfx->strikespre;
                         $pitch->strikespre = $pfx->strikespre;
-                        $pitch->pitch_type_id = $pitch_type->id;
-                        $pitch->event_code_id = $event_code->id;
-                        $pitch->pitch_result_type_id = $pitch_result_type->id;
+                        if ($pitch_type){
+                            $pitch->pitch_type_id = $pitch_type->id;
+                        }
+                        if ($event_code){
+                            $pitch->event_code_id = $event_code->id;
+                        }
+                        if ($pitch_result_type){
+                            $pitch->pitch_result_type_id = $pitch_result_type->id;
+                        }
                         $pitch->pa_number = $pfx->pa_number;
                         $pitch->pa_sequence = $pfx->pa_sequence;
                         $pitch->save();
