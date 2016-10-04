@@ -225,7 +225,7 @@ class CompareSources extends Command
                         $pitch->batter_id = $batter->id;
                         $pitch->pitcher_id = $pitcher->id;
                         $pitch->inning = $pfx->inning;
-                        $pitch->velocity = $pfx->initial_speed;
+                        $pitch->velocity = floatval($pfx->initial_speed);
                         $pitch->ballspre = $pfx->ballspre;
                         $pitch->strikespre = $pfx->strikespre;
                         $pitch->strikespre = $pfx->strikespre;
