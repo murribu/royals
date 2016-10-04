@@ -203,14 +203,14 @@ class CompareSources extends Command
                             ->where('code', $pfx->pitch_name)
                             ->first();
                         if (!$data_source_pitch_type){
-                            dd("Pitch Type not found ".$pfx->pitch_name);
+                            $this->info("Pitch Type not found ".$pfx->pitch_name);
                         }
                         $pitch_type = $data_source_pitch_type->pitch_type();
                         $data_source_event_code = DataSourceEventCode::where('data_source_id', $source_pfx->id)
                             ->where('code', $pfx->event_result)
                             ->first();
                         if (!$data_source_event_code){
-                            dd("Event Code not found ".$pfx->event_result);
+                            $this->info("Event Code not found ".$pfx->event_result);
                         }
                         $event_code = $data_source_event_code->event_code();
                         $pitch_result_type = PitchResultType::where('code', $pfx->event_type)->orderBy('id', 'desc')->first();
