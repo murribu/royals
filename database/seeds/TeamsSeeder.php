@@ -21,7 +21,7 @@ class TeamsSeeder extends Seeder{
                 'league' => 'AL',
                 'bbref' => 'LAA',
                 'location' => 'Los Angeles',
-                'name' => 'Angels of Anaheim',
+                'name' => 'Angels',
             ),
             array(
                 'stats_abbr' => 'ari',

@@ -44,9 +44,12 @@ class ApiController extends Controller
         left join teams as home_team on home_team.id = games.home_team_id
         left join teams as away_team on away_team.id = games.away_team_id
         left join pitches on pitches.game_id = games.id
-        left join `discrepancies` on `discrepancies`.`pitch_id` = `pitches`.`id` and `discrepancies`.`resolved` is null
-        where date between ? and ?
-        group by home_team.name, away_team.name, games.id";
+        left join `discrepancies` on `discrepancies`.`pitch_id` = `pitches`.`id` and `discrepancies`.`resolved` is null ";
+        if (Input::get('ignore_pitch_type_discrepancies') == 'true'){
+            $query .= " and discrepancies.column_name != 'pitch_type' ";
+        }
+        $query .= " 
+        where date between ? and ? group by home_team.name, away_team.name, games.id";
         $ret = DB::select($query, [$year.'-'.$month.'-'.$day, $year.'-'.$month.'-'.$day]);
         return $ret;
     }
@@ -56,7 +59,7 @@ class ApiController extends Controller
             ->leftJoin('teams as away_team', 'away_team.id', '=', 'games.away_team_id')
             ->select('home_team.name as home_team', 'away_team.name as away_team', 'games.id as game_id', 'games.id', DB::raw("concat('http://www.baseball-reference.com/boxes/', home_team.bbref, '/', home_team.bbref, year(games.date), lpad(month(games.date), 2, '0'), lpad(day(games.date), 2, '0'), '0.shtml#div_play_by_play') as bbref_url"))
             ->find($game_id);
-        $game->innings = $game->innings();
+        $game->innings = $game->innings(Input::get('ignore_pitch_type_discrepancies'));
         return $game;
     }
     
@@ -64,7 +67,11 @@ class ApiController extends Controller
         $query = "select batter.last_name as batter, pitcher.last_name pitcher, count(pitches.id) as pitch_count, pa_number, count(discrepancies.id) discrepancies 
             from `pitches` 
             left join `players` as `batter` on `batter`.`id` = `pitches`.`batter_id` left join `players` as `pitcher` on `pitcher`.`id` = `pitches`.`pitcher_id` 
-            left join `discrepancies` on `discrepancies`.`pitch_id` = `pitches`.`id` and `discrepancies`.`resolved` is null
+            left join `discrepancies` on `discrepancies`.`pitch_id` = `pitches`.`id` and `discrepancies`.`resolved` is null ";
+            if (Input::get('ignore_pitch_type_discrepancies') == 'true'){
+                $query .= " and discrepancies.column_name != 'pitch_type' ";
+            }
+            $query .= " 
             where `game_id` = ? and `inning` = ? 
             group by `pa_number`, `batter`.`first_name`, `batter`.`last_name`, `pitcher`.`first_name`, `pitcher`.`last_name`, `pa_number`";
 
@@ -87,7 +94,11 @@ class ApiController extends Controller
         $pfx_query = "select pfx_pitches.id, pfx_pitches.pa_sequence, pfx_pitches.initial_speed, pfx_pitches.pitch_name, max(discrepancies.pitch_id) pitch_id, pfx_pitches.event_result event_type, group_concat(distinct discrepancies.column_name) discrepancies_str
             from `pfx_pitches` 
             left join `discrepancy_data_sources` on `discrepancy_data_sources`.`data_source_table_id` = `pfx_pitches`.`id` and `discrepancy_data_sources`.`data_source_id` = 2 
-            left join `discrepancies` on `discrepancies`.`id` = `discrepancy_data_sources`.`discrepancy_id` and `discrepancies`.`resolved` is null 
+            left join `discrepancies` on `discrepancies`.`id` = `discrepancy_data_sources`.`discrepancy_id` and `discrepancies`.`resolved` is null  ";
+            if (Input::get('ignore_pitch_type_discrepancies') == 'true'){
+                $pfx_query .= " and discrepancies.column_name != 'pitch_type' ";
+            }
+            $pfx_query .= " 
             where `game_id` = (select `pfx_id` from `games` where `id` = ?) and `pa_number` = ? 
             group by `pfx_pitches`.`id`, `pfx_pitches`.`pa_sequence`, `pfx_pitches`.`initial_speed`, `pfx_pitches`.`pitch_name`, pfx_pitches.event_result";
 
@@ -95,7 +106,11 @@ class ApiController extends Controller
         
         $stats_query = "select stats_pitches.id, stats_pitches.pa_sequence, stats_pitches.stats_velocity, pitch_types.name pitch_name, max(discrepancies.pitch_id) pitch_id, event_codes.name event_type, group_concat(distinct discrepancies.column_name) discrepancies_str 
             from `stats_pitches` left join `discrepancy_data_sources` on `discrepancy_data_sources`.`data_source_table_id` = `stats_pitches`.`id` and `discrepancy_data_sources`.`data_source_id` = 1 
-            left join `discrepancies` on `discrepancies`.`id` = `discrepancy_data_sources`.`discrepancy_id` and `discrepancies`.`resolved` is null 
+            left join `discrepancies` on `discrepancies`.`id` = `discrepancy_data_sources`.`discrepancy_id` and `discrepancies`.`resolved` is null  ";
+            if (Input::get('ignore_pitch_type_discrepancies') == 'true'){
+                $stats_query .= " and discrepancies.column_name != 'pitch_type' ";
+            }
+            $stats_query .= " 
             left join `pitch_types` on `pitch_types`.`id` = `stats_pitches`.`stats_pitch_type_id` 
             left join event_codes on stats_pitches.stats_event_code_id = event_codes.id
             where `game_id` = (select `stats_game_id` from `games` where `id` = ?) and `pa_number` = ? 

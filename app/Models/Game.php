@@ -13,10 +13,14 @@ class Game extends Model {
         return $this->belongsTo('App\Models\Team', 'away_team_id');
     }
     
-    public function innings(){
+    public function innings($ignore_pitch_type_discrepancies){
         $query = "select inning, count(discrepancies.id) discrepancies
         from pitches 
-        left join discrepancies on discrepancies.pitch_id = pitches.id and discrepancies.resolved is null
+        left join discrepancies on discrepancies.pitch_id = pitches.id and discrepancies.resolved is null ";
+        if ($ignore_pitch_type_discrepancies == 'true'){
+            $query .= " and discrepancies.column_name != 'pitch_type' ";
+        }
+        $query .= " 
         where game_id = ?
         group by inning
         ";

@@ -34,6 +34,16 @@
         <div class="back">
             <a href="#" @click="selected.game = {}">&lt; Back</a>
         </div>
+        <div class="settings">
+            <div class="row" style="border: 1px solid black;border-radius: 15px;margin-top: 15px;">
+                <div class="col-xs-3">
+                    Ignore Pitch Type Discrepancies:
+                </div>
+                <div class="col-xs-3">
+                    <input class="form-control" type="checkbox" v-model="ignore_pitch_type_discrepancies" @change="changePitchTypeIgnore()" />
+                </div>
+            </div>
+        </div>
         <h3>@{{selected.game.away_team + ' @ ' + selected.game.home_team + ' - ' + monthnames[selected.month] + ' ' + selected.day + ', ' + selected.year}}</h3>
         <ul class="nav nav-tabs">
             <li v-for="i in selected.game.innings" 

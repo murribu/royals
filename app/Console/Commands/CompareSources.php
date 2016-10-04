@@ -264,7 +264,7 @@ class CompareSources extends Command
                         $d = Discrepancy::create_from_bad_data('velocity', $pitch, $pfx, $stat);
                     }
                     // pitch_name	
-                    if (!$data_source_pitch_type->does_match($stat->pitch_type, $source_stats)){
+                    if ($data_source_pitch_type && !$data_source_pitch_type->does_match($stat->pitch_type, $source_stats)){
                         $d = Discrepancy::create_from_bad_data('pitch_type', $pitch, $pfx, $stat);
                     }
                 }

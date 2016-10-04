@@ -34,6 +34,7 @@ Vue.component('dashboard',{
             days: [],
             games: [],
             monthnames: ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Nov', 'Dec'],
+            ignore_pitch_type_discrepancies: true,
         };
     },
     created: function(){
@@ -111,7 +112,11 @@ Vue.component('dashboard',{
         },
         loadGames: function(y, m, d){
             var vm = this;
-            this.$http.get('/api/games/' + y + '/' + m + '/' + d).then(function(data){
+            var querystring = '?';
+            if (this.ignore_pitch_type_discrepancies){
+                querystring += 'ignore_pitch_type_discrepancies=true';
+            }
+            this.$http.get('/api/games/' + y + '/' + m + '/' + d + querystring).then(function(data){
                 vm.games = JSON.parse(data.body);
             },function(d){
                 alert('error');
@@ -119,12 +124,17 @@ Vue.component('dashboard',{
         },
         selectGame: function(g){
             this.loadGame(g.game_id);
-            this.loadInning(g.game_id, 1);
+            this.unselectPlateAppearance();
         },
         loadGame: function(g){
             var vm = this;
-            this.$http.get('/api/game/' + g).then(function(data){
+            var querystring = '?';
+            if (this.ignore_pitch_type_discrepancies){
+                querystring += 'ignore_pitch_type_discrepancies=true';
+            }
+            this.$http.get('/api/game/' + g + querystring).then(function(data){
                 vm.selected.game = JSON.parse(data.body);
+                this.selectInning(1);
             },function(d){
                 alert('error');
             });
@@ -136,7 +146,11 @@ Vue.component('dashboard',{
         },
         loadInning: function(g, i){
             var vm = this;
-            this.$http.get('/api/game/' + g + '/inning/' + i).then(function(data){
+            var querystring = '?';
+            if (this.ignore_pitch_type_discrepancies){
+                querystring += 'ignore_pitch_type_discrepancies=true';
+            }
+            this.$http.get('/api/game/' + g + '/inning/' + i + querystring).then(function(data){
                 vm.selected.inning.plate_appearances = JSON.parse(data.body);
             },function(d){
                 alert('error');
@@ -149,7 +163,11 @@ Vue.component('dashboard',{
         },
         loadPlateAppearance: function(g, pa){
             var vm = this;
-            this.$http.get('/api/game/' + g + '/pa/' + pa).then(function(data){
+            var querystring = '?';
+            if (this.ignore_pitch_type_discrepancies){
+                querystring += 'ignore_pitch_type_discrepancies=true';
+            }
+            this.$http.get('/api/game/' + g + '/pa/' + pa + querystring).then(function(data){
                 var ret = JSON.parse(data.body);
                 for (p in ret.pfx){
                     ret.pfx[p].discrepancies = {};
@@ -235,6 +253,9 @@ Vue.component('dashboard',{
                 pfx: '',
                 stats: '',
             };
+        },
+        changePitchTypeIgnore: function(){
+            this.selectGame(this.selected.game);
         }
     }
 });
