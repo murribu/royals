@@ -83,7 +83,6 @@ class CompareSources extends Command
         }
         $source_pfx = DataSource::where('name', 'Pitch F/X')->first();
         $source_stats = DataSource::where('name', 'Stats')->first();
-        DB::enableQueryLog();
         $game_id = PfxPitch::whereNotIn('id', function($query){
             $query->select('data_source_table_id')
                 ->from('pitch_data_sources')
@@ -102,7 +101,7 @@ class CompareSources extends Command
                 });
         })->select('game_id')
         ->first();
-        dd(DB::getQueryLog());
+        
         $game_id = $game_id['game_id'];
         
         if ($game_id){
