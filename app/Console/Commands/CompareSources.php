@@ -149,6 +149,7 @@ class CompareSources extends Command
                     DB::commit();
                 }else{
                     $data_source_pitch_type = false;
+                    $data_source_event_code = false;
                     $pitch = Pitch::where('id', function($query) use ($source_pfx, $pfx){
                         $query->select('pitch_id')
                             ->from('pitch_data_sources')
@@ -253,7 +254,7 @@ class CompareSources extends Command
                     // event_result	
                     if ($pfx->event_result != 'NA'){
                         //It's the end of a PA
-                        if (!$data_source_event_code->does_match($stat->event_code, $source_stats)){
+                        if ($data_source_event_code && !$data_source_event_code->does_match($stat->event_code, $source_stats)){
                             $d = Discrepancy::create_from_bad_data('event_code', $pitch, $pfx, $stat);
                         }
                     }
