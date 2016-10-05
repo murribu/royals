@@ -15,7 +15,7 @@ class Discrepancy extends Model {
         return PfxPitch::whereIn('id', function($query){
             $query->select('data_source_table_id')
                 ->from('discrepancy_data_sources')
-                ->where('data_source_id', '=', DB::raw('1'))
+                ->where('data_source_id', '=', DB::raw('2'))
                 ->where('discrepancy_id', $this->id);
         })->get();
     }
@@ -24,7 +24,7 @@ class Discrepancy extends Model {
         return StatsPitch::whereIn('id', function($query){
             $query->select('data_source_table_id')
                 ->from('discrepancy_data_sources')
-                ->where('data_source_id', '=', DB::raw('2'))
+                ->where('data_source_id', '=', DB::raw('1'))
                 ->where('discrepancy_id', $this->id);
         })->get();
     }
