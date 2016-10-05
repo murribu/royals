@@ -82,9 +82,12 @@ class StatsPitch extends Model {
             $p->pa_number = $pa_number;
             $p->pa_sequence = $pa_sequence;
             $p->game_id = $game_id;
-            $p->save();
+            if (@$p->save()){
+                return ['success' => 1, 'message' => 'Record created'];
+            }else{
+                return ['success' => 0, 'message' => 'This StatsPitch already existed after it was prepared'];
+            }
             
-            return ['success' => 1, 'message' => 'Record created'];
         }
     }
 }
