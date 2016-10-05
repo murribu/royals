@@ -138,6 +138,11 @@ class ApiController extends Controller
                 $ret['stats'] = $d->stats_pitch()->first()->event_code ? $d->stats_pitch()->first()->event_code->name : '';
                 $ret['truth'] = $d->pitch->event_code();
                 break;
+            case 'velocity':
+                $ret['pfx'] = $d->pfx_pitch()->first()->initial_speed;
+                $ret['stats'] = $d->stats_pitch()->first()->stats_velocity;
+                $ret['truth'] = $d->pitch->velocity;
+                break;
         }
         
         return $ret;
@@ -172,6 +177,14 @@ class ApiController extends Controller
                     $pitch->event_code_id = $dsec->event_code()->id;
                 }elseif($new_truth_source == 'stats'){
                     $pitch->event_code_id = $d->stats_pitch()->first()->stats_event_code_id;
+                }
+                $pitch->save();
+                break;
+            case 'velocity':
+                if ($new_truth_source == 'pfx'){
+                    $pitch->velocity = $d->pfx_pitch()->first()->initial_speed;
+                }elseif($new_truth_source == 'stats'){
+                    $pitch->velocity = $d->stats_pitch()->first()->stats_velocity;
                 }
                 $pitch->save();
                 break;

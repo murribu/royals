@@ -110,7 +110,8 @@
                                         <td>@{{pitch.pa_sequence}}</td>
                                         <td :class="{'discrepancy' : pitch.discrepancies.pitch_type}"
                                             @click="selectDiscrepancy(pitch, 'pitch_type')">@{{pitch.pitch_name}}</td>
-                                        <td>@{{pitch.initial_speed}}</td>
+                                        <td :class="{'discrepancy' : pitch.discrepancies.velocity}"
+                                            @click="selectDiscrepancy(pitch, 'velocity')">@{{pitch.initial_speed}}</td>
                                         <td :class="{'discrepancy' : pitch.discrepancies.event_code}"
                                             @click="selectDiscrepancy(pitch, 'event_code')">@{{pitch.event_type}}</td>
                                     </tr>
@@ -132,7 +133,8 @@
                                         <td>@{{pitch.pa_sequence}}</td>
                                         <td :class="{'discrepancy' : pitch.discrepancies.pitch_type}"
                                             @click="selectDiscrepancy(pitch, 'pitch_type')">@{{pitch.pitch_name}}</td>
-                                        <td>@{{pitch.stats_velocity}}</td>
+                                        <td :class="{'discrepancy' : pitch.discrepancies.velocity}"
+                                            @click="selectDiscrepancy(pitch, 'velocity')">@{{pitch.stats_velocity}}</td>
                                         <td :class="{'discrepancy' : pitch.discrepancies.event_code}"
                                             @click="selectDiscrepancy(pitch, 'event_code')">@{{pitch.event_type}}</td>
                                     </tr>

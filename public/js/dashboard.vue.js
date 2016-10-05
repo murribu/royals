@@ -125,6 +125,7 @@ Vue.component('dashboard',{
         selectGame: function(g){
             this.loadGame(g.game_id);
             this.unselectPlateAppearance();
+            this.selectInning(1);
         },
         loadGame: function(g){
             var vm = this;
@@ -134,7 +135,6 @@ Vue.component('dashboard',{
             }
             this.$http.get('/api/game/' + g + querystring).then(function(data){
                 vm.selected.game = JSON.parse(data.body);
-                this.selectInning(1);
             },function(d){
                 alert('error');
             });

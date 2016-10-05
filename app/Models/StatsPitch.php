@@ -49,8 +49,8 @@ class StatsPitch extends Model {
             // $pitcher = Player::first_or_create_from_id_and_name($line['pitcher_id'], $line['pitcher_name']);
             $data_source_pitch_type = DataSourcePitchType::firstOrCreate(['code' => $line['statspitchtype'], 'data_source_id' => $source_stats->id]);
             $pitch_type = $data_source_pitch_type->pitch_type();
-            $data_source_batted_ball_type = DataSourceBattedBallType::firstOrCreate(['code' => $line['battedballtype'], 'data_source_id' => $source_stats->id]);
-            $batted_ball_type = $data_source_batted_ball_type->batted_ball_type();
+            // $data_source_batted_ball_type = DataSourceBattedBallType::firstOrCreate(['code' => $line['battedballtype'], 'data_source_id' => $source_stats->id]);
+            // $batted_ball_type = $data_source_batted_ball_type->batted_ball_type();
             $away_team = Team::firstOrCreate(['stats_abbr' => $line['away_team']]);
             $home_team = Team::firstOrCreate(['stats_abbr' => $line['home_team']]);
             
@@ -69,7 +69,7 @@ class StatsPitch extends Model {
                 $p->stats_velocity = $line['stats_velocity'];
             }
             $p->stats_pitch_type_id = $pitch_type->id;
-            $p->stats_batted_ball_type_id = $batted_ball_type->id;
+            // $p->stats_batted_ball_type_id = $batted_ball_type->id;
             if ($next && ($next['inning'] != $line['inning'] || $next['batter_id'] != $line['batter_id'])){
                 //last pitch of pa
                 $data_source_event = DataSourceEventCode::firstOrCreate(['code' => $line['event'], 'data_source_id' => $source_stats->id]);
