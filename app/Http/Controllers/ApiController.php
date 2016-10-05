@@ -88,7 +88,7 @@ class ApiController extends Controller
         }
             
         foreach($pitches as $pitch){
-            $pitch->pitch_type_name = $pitch->pitch_type->name;
+            $pitch->pitch_type_name = $pitch->pitch_type ? $pitch->pitch_type->name : '';
         }
         
         $pfx_query = "select pfx_pitches.id, pfx_pitches.pa_sequence, pfx_pitches.initial_speed, pfx_pitches.pitch_name, max(discrepancies.pitch_id) pitch_id, pfx_pitches.event_result event_type, group_concat(distinct discrepancies.column_name) discrepancies_str

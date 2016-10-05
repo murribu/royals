@@ -40,7 +40,8 @@ class EventCodesSeeder extends Seeder{
                         '24'
                     ),
                     'pfx' => array(
-                        'fielders_choice'
+                        'fielders_choice',
+                        'fielders_choice_out',
                     ),
                 ),
             ),

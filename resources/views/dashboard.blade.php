@@ -25,7 +25,11 @@
             <li v-for="day in days" :class="{'active': day == selected.day}"><a href="#"@click="selectDay(day)">@{{day}}</a></li>
         </ul>
         <div class="games-container" v-show="games">
-            <div class="game-button" v-for="game in games" :class="{'active': game.id == selected.game}" @click="selectGame(game)">
+            <div class="game-button" 
+                v-for="game in games" 
+                :class="{'active': game.id == selected.game, 'has-bad-badge': game.discrepancies > 0}" 
+                :data-bad-badge="game.discrepancies"
+                @click="selectGame(game)">
                 @{{game.away_team}} <br>@ @{{game.home_team}}
             </div>
         </div>
